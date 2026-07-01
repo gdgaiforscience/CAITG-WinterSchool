@@ -1,0 +1,40 @@
+project:
+  type: website
+  resources:
+    - styles.css
+
+website:
+  title: "Build with AI" 
+  navbar:
+    left:
+      - href: session/01-intro.ipynb
+        text: Python
+      - text: "Tailoring LLMs"
+        menu:
+          - href: session/02-a-finetune.ipynb
+            text: Finetuning
+          - href: session/02-b-RAG.ipynb
+            text: RAG
+      - href: session/03-agents.ipynb
+        text: Agents
+      - href: session/04-antigravity.qmd
+        text: Antigravity
+  google-analytics:
+    tracking-id: "G-344M4P3CHH"
+    storage: cookies
+    anonymize-ip: true
+  repo-url: https://github.com/gdgaiforscience/Build-with-AI
+  repo-actions: [edit]
+
+format:
+  html:
+    css: styles.css
+    toc: true
+    toc-depth: 2
+    code-overflow: wrap
+    respect-user-color-scheme: true
+    theme:
+      light: [flatly, custom.scss]
+      dark: [darkly, custom.scss]
+
+

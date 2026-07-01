@@ -1,0 +1,57 @@
+/* Scoped theme-specific CSS variables */
+body.quarto-light {
+  --code-block-bg: #dcddde;
+  /* Light Google Gray */
+  --code-block-border: #174EA6;
+  /* Google Blue */
+  --code-block-raw-bg: #f1f3f4;
+  /* Medium Light Gray */
+  --code-block-raw-border: #a142f4;
+  /* Google Purple */
+  --code-block-raw-text: #7627bb;
+  /* Dark Purple for contrast */
+}
+
+body.quarto-dark {
+  --code-block-bg: #5a5d65;
+  /* Dark Google Gray */
+  --code-block-border: #8ab4f8;
+  /* Light Google Blue */
+  --code-block-raw-bg: #2a2b2d;
+  /* Lighter Dark Gray */
+  --code-block-raw-border: #c58af9;
+  /* Light Google Purple */
+  --code-block-raw-text: #e9d5ff;
+  /* Soft Purple/Lavender */
+}
+/* 1. THE DEFAULT STYLE 
+   Applies to all code blocks by default */
+div.sourceCode {
+  background-color: var(--code-block-bg);
+    border-left: 5px solid var(--code-block-border);
+  margin-bottom: 1em;                /* Spacing */
+  border-radius: 4px;                /* Optional: makes it look nicer */
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  div.sourceCode:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  body.quarto-dark div.sourceCode:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 2. THE CUSTOM "RAW" STYLE
+   Overrides the default only when {.raw} is present */
+div.sourceCode.raw {
+  /* background-color: var(--code-block-raw-bg); */
+    border-left-color: var(--code-block-raw-border);
+}
+
+/* Optional: Change text color inside the raw block */
+/* div.sourceCode.raw code {
+  color: var(--code-block-raw-text);
+}
+
+*/
