@@ -1,64 +1,21 @@
-# Build with AI
-AI for Science - Build with AI workshop series to supercharge your scientific workflows and pipelines.
+# AI Masterclass: Accelerating Research with Trusted AI
+Designed for researchers and professional staff, this full-day hands-on workshop will empower you to integrate advanced AI capabilities into your workflows. You will quickly advance from foundational Python integrations to building robust AI systems you can reuse for your own work. You will learn to construct secure Retrieval-Augmented Generation (RAG) pipelines, develop intelligent autonomous agents, and apply modern computer vision techniques to research data, all while considerate of data privacy and governance standards.
 
-Modify `index.qmd` and files in `./sessions` to update the tutorial pages.
+## Session 1: AI Foundations
+We will explore the fundamental concepts required for AI-powered research. Starting with a frictionless technical setup using Google Colab and Google AI Studio, you will learn how to seamlessly integrate machine learning and Python with the Gemini API. 
 
-Modify `styles.css`, `custom.scss` and `_quarto.yml` to change the look and feel of the rendered pages.
+## Session 2: Customising LLMs: Fine-Tuning vs. RAG
+Unlock the power of Large Language Models on your own private, domain-specific data. We will unpack the critical differences between model Fine-Tuning and Retrieval-Augmented Generation (RAG). You will gain practical experience in tailoring LLMs to securely interrogate custom knowledge bases, ensuring your AI outputs remain accurate, verifiable, and aligned with your data.
 
-They will be rendered at: https://gdgaiforscience.github.io/Build-with-AI/
+## Session 3: Building AI Agents for Research
+In this session, you will learn how to equip AI agents with the specific tools and skills they need to automate complex workflows (such as literature aggregation, data processing, and API calling). We will build intelligent agents that do useful heavy lifting while maintaining vital human-in-the-loop oversight.
 
+## Session 4: Multimodal AI & Applied Computer Vision
+Explore modern approaches to visual data in research. We will dive into computer vision, focusing on object detection and semantic segmentation. You will understand the underlying mechanics of different segmentation approaches, identify key research use cases (from satellite imagery to biomedical scans), and learn how to leverage multimodal models to extract rich, actionable insights from complex visual datasets.
 
+## Requirements
+Laptop with a steady internet connection.
+A Google account to use Colab, AI Studio, and Kaggle.
 
-## Setting up this repo for auto-building the github pages site
-
-FYI, this only has to be done once. And has already been done. Now just fork this repo or use it as a template when making a new page!
-
-Build the workshop files locally with 
-```
-git clone  
-cd Build-with-AI
-quarto render index.qmd 
-git commit -am "New build"
-git push
-```
-
-You must also make a `gh-pages` branch and publish the quarto pages to it locally first. Probably better ways to do this:
-```
-git checkout -n gh-pages
-quarto publish gh-pages
-git push origin gh-pages 
-git checkout main
-```
-
-On the repo turn on github pages at: https://github.com/gdgaiforscience/Build-with-AI/settings/pages
-And have it render from `gh-pages` branch.
-
-Add this github action file to render the quarto page on any repo updates. Note any code execution (e.g Python or executable blocks with `{}` syntax will need more installations).
-```
-name: Quarto Publish
-
-on:
-  push:
-    branches: main
-
-permissions:
-  contents: write
-  
-jobs:
-  build-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up Quarto
-        uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          tinytex: true
-
-      - name: Publish to GitHub Pages (and render)
-        uses: quarto-dev/quarto-actions/publish@v2
-        with:
-          target: gh-pages
-          path: .
-```
+## Bio:
+Nate is the Science Catalyst Program Manager working at Google, uniting the amazing research taking place around the world. He has an Honours in Astrophysics, a PhD in Geophysics, and a long tenure of using research computing infrastructure to help solve tricky science problems. Somewhere along the way he became a Carpentries instructor.
