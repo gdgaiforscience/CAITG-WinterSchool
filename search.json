@@ -2,42 +2,42 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "",
     "text": "The Centre for AI, Trust & Governance (CAITG) AI Winter School is an immersive four-day program hosted at the University of Sydney. Designed for graduate students, postdoctoral scholars, and early career researchers across all disciplines. The AI Winter School will provide practical training in state-of-the-art AI tools, research applications, ethical frameworks, and responsible practice.\nThe Google Developer Group AI for Science is running an AI Masterclass on day two of the School."
   },
   {
     "objectID": "index.html#ai-masterclass-accelerating-research-with-trusted-ai",
     "href": "index.html#ai-masterclass-accelerating-research-with-trusted-ai",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "AI Masterclass: Accelerating Research with Trusted AI",
     "text": "AI Masterclass: Accelerating Research with Trusted AI\nDesigned for researchers and professional staff, this full-day hands-on workshop will empower you to integrate advanced AI capabilities into your workflows. You will quickly advance from foundational Python integrations to building robust AI systems you can reuse for your own work. You will learn to construct secure Retrieval-Augmented Generation (RAG) pipelines, develop intelligent autonomous agents, and apply modern computer vision techniques to research data, all while considerate of data privacy and governance standards.\n\nSession 1: AI Foundations\nWe will explore the fundamental concepts required for AI-powered research. Starting with a frictionless technical setup using Google Colab and Google AI Studio, you will learn how to seamlessly integrate machine learning and Python with the Gemini API.\n\n\nSession 2: Customising LLMs: Fine-Tuning vs. RAG\nUnlock the power of Large Language Models on your own private, domain-specific data. We will unpack the critical differences between model Fine-Tuning and Retrieval-Augmented Generation (RAG). You will gain practical experience in tailoring LLMs to securely interrogate custom knowledge bases, ensuring your AI outputs remain accurate, verifiable, and aligned with your data.\n\n\nSession 3: Building AI Agents for Research\nIn this session, you will learn how to equip AI agents with the specific tools and skills they need to automate complex workflows (such as literature aggregation, data processing, and API calling). We will build intelligent agents that do useful heavy lifting while maintaining vital human-in-the-loop oversight.\n\n\nSession 4: Multimodal AI & Applied Computer Vision\nExplore modern approaches to visual data in research. We will dive into computer vision, focusing on object detection and semantic segmentation. You will understand the underlying mechanics of different segmentation approaches, identify key research use cases (from satellite imagery to biomedical scans), and learn how to leverage multimodal models to extract rich, actionable insights from complex visual datasets."
   },
   {
     "objectID": "index.html#register",
     "href": "index.html#register",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "Register",
     "text": "Register\nRegister for the series at the CAITG AI Winter School\n\nJoin the community (in Australia, Korea, Japan, or India) for talks, events, collaborations and more."
   },
   {
     "objectID": "index.html#when",
     "href": "index.html#when",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "When",
     "text": "When\nJul 28, 9:00 AM – 5:00 PM"
   },
   {
     "objectID": "index.html#target-audience",
     "href": "index.html#target-audience",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "Target Audience",
     "text": "Target Audience\nThis workshop is aimed at anyone looking to accelerate their research with AI including:\n\nResearch students (undergrad, masters, PhD, etc)\nResearchers requiring AI tools\nData Scientists and professionals supporting scientific projects\n\nUse cases will be grounded in typical scientific workloads."
   },
   {
     "objectID": "index.html#requirements",
     "href": "index.html#requirements",
-    "title": "Build with AI",
+    "title": "CAITG AI Winter School",
     "section": "Requirements",
     "text": "Requirements\n\nA Google account to use Google Colab, Kaggle, AI Studio, and Antigravity.\nBasic familiarlity with Python."
   },
