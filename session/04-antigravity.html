@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>antigravity – Build with AI</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-c83517e64ba457b42d1f9064e921a0b0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-e58f3d873108b9e472158fba49ee109d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-c83517e64ba457b42d1f9064e921a0b0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-344M4P3CHH"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-344M4P3CHH', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Build with AI</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../session/01-intro.html"> 
+<span class="menu-text">Python</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tailoring-llms" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Tailoring LLMs</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tailoring-llms">    
+        <li>
+    <a class="dropdown-item" href="../session/02-a-finetune.html">
+ <span class="dropdown-text">Finetuning</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../session/02-b-RAG.html">
+ <span class="dropdown-text">RAG</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../session/03-agents.html"> 
+<span class="menu-text">Agents</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="../session/04-antigravity.html" aria-current="page"> 
+<span class="menu-text">Antigravity</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#build-with-ai---ai-assisted-research-with-antigravity" id="toc-build-with-ai---ai-assisted-research-with-antigravity" class="nav-link active" data-scroll-target="#build-with-ai---ai-assisted-research-with-antigravity"><strong>Build with AI - AI-Assisted Research with Antigravity</strong></a>
+  <ul class="collapse">
+  <li><a href="#workshop-goals-learning-objectives" id="toc-workshop-goals-learning-objectives" class="nav-link" data-scroll-target="#workshop-goals-learning-objectives">Workshop Goals / Learning Objectives</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#get-started" id="toc-get-started" class="nav-link" data-scroll-target="#get-started">Get started</a></li>
+  <li><a href="#example-1-first-prompt" id="toc-example-1-first-prompt" class="nav-link" data-scroll-target="#example-1-first-prompt">Example 1: First prompt</a></li>
+  <li><a href="#example-2-working-with-your-data" id="toc-example-2-working-with-your-data" class="nav-link" data-scroll-target="#example-2-working-with-your-data">Example 2: Working with your data</a></li>
+  <li><a href="#example-3-updating-existing-code" id="toc-example-3-updating-existing-code" class="nav-link" data-scroll-target="#example-3-updating-existing-code">Example 3: Updating existing code</a></li>
+  <li><a href="#example-4-reproduce-results" id="toc-example-4-reproduce-results" class="nav-link" data-scroll-target="#example-4-reproduce-results">Example 4: Reproduce results</a></li>
+  <li><a href="#example-5-multi-agent-orchestration" id="toc-example-5-multi-agent-orchestration" class="nav-link" data-scroll-target="#example-5-multi-agent-orchestration">Example 5: Multi-agent orchestration</a></li>
+  <li><a href="#example-6-grant-writing-assistance" id="toc-example-6-grant-writing-assistance" class="nav-link" data-scroll-target="#example-6-grant-writing-assistance">Example 6: Grant writing assistance</a></li>
+  <li><a href="#example-7-mcp-servers" id="toc-example-7-mcp-servers" class="nav-link" data-scroll-target="#example-7-mcp-servers">Example 7: MCP servers</a></li>
+  <li><a href="#example-8-targeted-literature-review-with-custom-mcp-server" id="toc-example-8-targeted-literature-review-with-custom-mcp-server" class="nav-link" data-scroll-target="#example-8-targeted-literature-review-with-custom-mcp-server">Example 8: Targeted literature review with custom MCP server</a></li>
+  <li><a href="#example-9-leverage-science-skills" id="toc-example-9-leverage-science-skills" class="nav-link" data-scroll-target="#example-9-leverage-science-skills">Example 9: Leverage Science Skills</a></li>
+  <li><a href="#example-10-building-a-pinn-testbench-with-antigravity" id="toc-example-10-building-a-pinn-testbench-with-antigravity" class="nav-link" data-scroll-target="#example-10-building-a-pinn-testbench-with-antigravity">Example 10: Building a PINN Testbench with Antigravity</a></li>
+  <li><a href="#final-thoughts" id="toc-final-thoughts" class="nav-link" data-scroll-target="#final-thoughts">Final thoughts</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul class="collapse"><li><a href="https://github.com/gdgaiforscience/Build-with-AI/edit/main/session/04-antigravity.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+
+
+
+
+
+<section id="build-with-ai---ai-assisted-research-with-antigravity" class="level1">
+<h1><strong>Build with AI - AI-Assisted Research with Antigravity</strong></h1>
+<p>Google’s code editor, <a href="https://antigravity.google/product/antigravity-ide"><strong>Antigravity</strong></a>, is an AI-assisted IDE (Integrated Development Environment) with native agentic and generative AI capabilities built into the platform to rapidly accelerate computational and data driven development and scientific research. Antigravity is built on top of the Visual Studio Code editor for a familiar but accelerated user experience. The embedded agentic assistance allows users to spend more time solving research problems and less time debugging problematic code. Note the <em>Antigravity</em> product suite has evolved rapidly since launch and now includes:</p>
+<ul>
+<li>Antigravity 2.0 - an agentic vibe</li>
+<li>Antigravity CLI - agentic capabilities built into the terminal</li>
+<li>Antigravity SDK - simple Python scripts to iterate on agentic applications</li>
+<li>Antigravity IDE - the original full featured Antigravity code editor and our focus for today.</li>
+</ul>
+<p>This workshop is designed for researchers of all coding skill levels. We will walk through simple, research-grounded examples to help you fit the Antigravity framework immediately to your own projects.</p>
+<p><strong>Instructors:</strong></p>
+<ul>
+<li><a href="https://www.linkedin.com/in/nathaniel-butterworth-72003877/">Dr Nate Butterworth</a></li>
+<li><a href="https://www.linkedin.com/in/rahul-sundar-311a6977/">Dr Rahul Sundar</a></li>
+</ul>
+<p><strong>Date:</strong> May 28, 2026</p>
+<p><strong>Recording:</strong> <a href="https://youtu.be/DxheR7YCH5I">https://youtu.be/DxheR7YCH5I</a></p>
+<section id="workshop-goals-learning-objectives" class="level2">
+<h2 class="anchored" data-anchor-id="workshop-goals-learning-objectives">Workshop Goals / Learning Objectives</h2>
+<ul>
+<li>Automatically visualise and explore your datasets.</li>
+<li>Wrangle and clean your data “instantly”.</li>
+<li>Refactor code to execute efficiently on HPC environments or similar.</li>
+<li>Produce machine learning pipelines that immediately fit your research problems.</li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<p>Before the session please download and install <strong>Antigravity IDE</strong> for your system by following the instructions here: <a href="https://antigravity.google/download#antigravity-ide">https://antigravity.google/download#antigravity-ide</a></p>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li>Basic coding knowledge will be helpful.</li>
+<li>A motivation to experiment</li>
+<li>Familiarity with Visual Studio Code editor will be helpful otherwise this will be a crash-course</li>
+<li><a href="https://conda-forge.org/download/">Python/conda</a> to complete most demos or sub for <a href="https://www.r-project.org/">R</a> or your favourite language.</li>
+<li><a href="https://nodejs.org/">Node.js</a> to use BigQuery in the MCP demo.</li>
+<li><a href="https://docs.astral.sh/uv/getting-started/installation/">uv package manager</a> to run the MCP demos.</li>
+</ul>
+</section>
+<section id="get-started" class="level2">
+<h2 class="anchored" data-anchor-id="get-started">Get started</h2>
+<p>After installation, the first time you launch Antigravity you will answer a few basic configuration steps (all options can be be left as default and changed later) then you will have to login with your Google credentials. You can also change user-accounts later if needed. From there you will land in the VSCode IDE, and can open a Folder/Project immediately starting hacking!</p>
+<p>We will run through a few different examples for how you can use Antigravity.</p>
+</section>
+<section id="example-1-first-prompt" class="level2">
+<h2 class="anchored" data-anchor-id="example-1-first-prompt">Example 1: First prompt</h2>
+<p>You can immediately get started with a prompt in the Agent Manager sidebar or window</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Your</span> goal is to show if temperature has changed in Sydney, Australia.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Keep the conversation going now it has developed more context:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Your</span> goal is to prove this using data and code</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Make sure you have tools (like Python) installed and the correct environments are being used. Put comments into the generated artefacts to give it helpful context hints:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">run</span> the tests in conda environment oztemp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="skills-and-rules" class="level3">
+<h3 class="anchored" data-anchor-id="skills-and-rules">Skills and Rules</h3>
+<p>Or you can add a <a href="https://antigravity.google/docs/skills">Skill</a> or a <a href="https://antigravity.google/docs/rules-workflows">Rule</a> to guide the agent to your preferences and needs.</p>
+<section id="skill" class="level4">
+<h4 class="anchored" data-anchor-id="skill">Skill</h4>
+<p>Skills are a <em>standard</em> (they work <a href="https://openskills.cc/">across all coding agents</a>) for equipping agents with tools and knowledge.</p>
+<p>Add skills to to your local workspace <code>.agents/skills/&lt;my-skill&gt;/</code> they all have to be called <code>SKILL.md</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode skill.md code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">name:</span><span class="co"> python environment</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> always work with the conda environment gdg when a user needs Python</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## Usage &amp; Guidelines</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>When a user needs to use Python (and no other environments are specified) use this skill.</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Before executing any Python scripts, commands, or installations, ensure that the <span class="in">`gdg`</span> conda environment is active.</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If the environment is not active, initialize and activate it using:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="in">```bash</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="ex">conda</span> activate gdg</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="in">```</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The names and descriptions of your skills are loaded automatically into your agent context (i.e.&nbsp;they cost you tokens) but it won’t read the details until it is invoked.</p>
+<blockquote class="blockquote">
+<p>Be careful downloading skills from the internet - be wary of malicious prompt injection.</p>
+</blockquote>
+</section>
+<section id="rules" class="level4">
+<h4 class="anchored" data-anchor-id="rules">Rules</h4>
+<p>Rules act like system prompts and can force/guide the agent. Add the following as a rule the try a simple prompt.</p>
+<pre><code># Coding tasks
+Preference R code as the default coding language for analysis and vizualisation.</code></pre>
+<p>Now keep the agent working with more complex tasks:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Please</span> extend this to make an animated heatmap of Australia<span class="st">'s Annual Mean Max Temperature</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+</section>
+<section id="example-2-working-with-your-data" class="level2">
+<h2 class="anchored" data-anchor-id="example-2-working-with-your-data">Example 2: Working with your data</h2>
+<p>Whilst you can start from scratch to develop a complete workflow, likely you will already have some bones of a repo. Let’s create a new project folder with some data and get Antigravity to work with that context:</p>
+<pre><code>mkdir demofaces
+cd demofaces
+curl -L -o human-face-emotions.zip\  https://www.kaggle.com/api/v1/datasets/download/samithsachidanandan/human-face-emotions
+unzip human-face-emotions.zip</code></pre>
+<p>Now give it a prompt:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Write</span> a TensorFlow model to classify the images of facial expressions in the Data folder into 5 classes based on the sub-folder names <span class="er">(</span><span class="ex">Angry,</span> Fear, Happy, Sad, Surprise<span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-3-updating-existing-code" class="level2">
+<h2 class="anchored" data-anchor-id="example-3-updating-existing-code">Example 3: Updating existing code</h2>
+<p>You may have been given some code or pulled it from a paper. You need to refactor it to run on your data or a high performance computing cluster. Download the <a href="https://raw.githubusercontent.com/gdgaiforscience/Antigravity/refs/heads/main/EXAMPLES/BIO/kmer_single.py">example script</a> or navigate through the repo.</p>
+<pre><code>cd EXAMPLES/BIO</code></pre>
+<p>Ask about the code:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">What</span> does this code do<span class="pp">?</span> Can you make my code run faster on my laptop<span class="pp">?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now parallelise it! And get the methodology for running it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Use</span> the conda environment <span class="st">"bio"</span> for any python processing</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">I</span> have been given access to the NCI HPC, how do I run this on many fastq files on that machine<span class="pp">?</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-4-reproduce-results" class="level2">
+<h2 class="anchored" data-anchor-id="example-4-reproduce-results">Example 4: Reproduce results</h2>
+<p>Antigravity has a bunch of built in tools that will work for you. In this example we will ask it to recreate a figure from a paper. You could be helpful and put the pdf or figure into a file, or make it do all the work with a prompt like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Recreate</span> the Fig 1 from the paper at https://www.nature.com/articles/s41586-025-09840-z</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-5-multi-agent-orchestration" class="level2">
+<h2 class="anchored" data-anchor-id="example-5-multi-agent-orchestration">Example 5: Multi-agent orchestration</h2>
+<p>From the <em>Agent Manager</em> you can launch multiple agents to work on different parts of a problem concurrently. But let’s hand complete control to the Agent, set it running and go and get a cup of coffee. Start new conversation in…</p>
+<p>Prompt 1:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">I</span> want to prove or disprove the correlation between earthquakes and Lunar cycles. Write a literature review with extensive referencing on this topic.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Prompt 2:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Pull</span> the required data and setup the project to to prove or disprove the correlation between earthquakes and Lunar cycles. </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Prompt 3:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Write</span> the code to prove or disprove the correlation between earthquakes and Lunar cycles.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Prompt 4:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Write</span> the conclusion based on the data and review about the link between Earthquakes and Lunar cycles</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-6-grant-writing-assistance" class="level2">
+<h2 class="anchored" data-anchor-id="example-6-grant-writing-assistance">Example 6: Grant writing assistance</h2>
+<p>Download a <a href="https://docs.google.com/document/d/1UQ9EvahDCUCJ9rXnI7KbWtaoWI_aD5H_zopckZvJ-uM/edit?usp=sharing">document to work with</a>. Then try a prompt like the following.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Read</span> the draft grant proposal in @grant_v1.docx. Cross-reference all technical claims in the <span class="st">'Methodology'</span> section with existing literature using search. Identify any <span class="st">'Innovation Claims'</span> that are actually already solved in recent 2026 publications. Check the budget section against the proposed computational requirements <span class="er">(</span><span class="ex">e.g.,</span> GPU hours for training the specified model<span class="kw">)</span> <span class="ex">and</span> flag if the requested funds are insufficient. Suggest three peer-reviewed citations that would strengthen the <span class="st">'Prior Work'</span> section.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-7-mcp-servers" class="level2">
+<h2 class="anchored" data-anchor-id="example-7-mcp-servers">Example 7: MCP servers</h2>
+<p>AI pre-trained memories are static must spend tokens to create new tools to do what you want. To help counteract this, Antigravity supports the Model Context Protocol (MCP), an open standard that allows you to securely connect your AI agent directly to live, external databases without needing to re-invent ways to connect and interact with data and the world.</p>
+<p>For this workflow we will activate the Antigravity built in <code>BigQuery</code> MCP servers. From the Agent panel select <code>Manage MCP Servers</code> and select the <code>Install</code> button. Then simply give it a prompt:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Find</span> tables related Remote Sensing</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You could then ask more questions, and rather then writing NEW code the agent will utilise pre-exissting tools to help you.</p>
+</section>
+<section id="example-8-targeted-literature-review-with-custom-mcp-server" class="level2">
+<h2 class="anchored" data-anchor-id="example-8-targeted-literature-review-with-custom-mcp-server">Example 8: Targeted literature review with custom MCP server</h2>
+<p>For this workflow, we will add the MCP server <a href="https://github.com/blazickjp/arxiv-mcp-server"><code>arxiv-mcp-server</code></a> to Antigravity’s settings. First install it with:</p>
+<p><code>uv tool install arxiv-mcp-server</code></p>
+<blockquote class="blockquote">
+<p>This assumes you have <code>uv</code> installed (a Python installer)</p>
+</blockquote>
+<p>Next add the config info to your Antigravity file</p>
+<p><code>MCP Servers &gt; Manage MCP Servers &gt; View raw config</code></p>
+<p>and then paste in the details:</p>
+<pre><code>{
+  "mcpServers": {
+    "arxiv": {
+      "command": "uvx",
+      "args": ["arxiv-mcp-server"]
+    }
+  }
+}</code></pre>
+<p>By explicitly routing the agent through an MCP server, you force it to ground its analysis in verified, retrieved full-text data rather than relying on a general web search or its pre-trained memory. This ensures maximum scientific rigor and reproducible data extraction. Finally ask a question:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Perform</span> a systematic search across ArXiv for <span class="st">'Non-pharmacological interventions for Neuroplasticity (2023-2026)'</span>. Extract the N-values, p-values, and effect sizes from the top 3 relevant papers. Use Python to aggregate this data into a structured CSV. Identify and highlight <span class="st">'Evidence Contradictions'</span> where two or more papers report conflicting results for the same intervention. Generate a summary identifying the <span class="st">'consensus gap'</span> and suggest three specific hypotheses for future experimental validation.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="example-9-leverage-science-skills" class="level2">
+<h2 class="anchored" data-anchor-id="example-9-leverage-science-skills">Example 9: Leverage Science Skills</h2>
+<p>Google recently released a bunch of Antigravity Skills for different <a href="https://github.com/google-deepmind/science-skills/tree/main">scientific workflows</a>. We can turn them on specifically (they just install to our global skill directory). Then ask a question which will force the use of the skill.</p>
+<p>Find them in: <code>Antigravity Settings &gt; Customizations &gt; Build With Google Plugins</code></p>
+<p>Then run the prompt.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Fetch</span> and analyze the AlphaFold structure for UniProt ID P00520, including pLDDT and domain boundary analysis.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p>Try this before and after adding the Skills to compare the different approaches of the agent.</p>
+</blockquote>
+</section>
+<section id="example-10-building-a-pinn-testbench-with-antigravity" class="level2">
+<h2 class="anchored" data-anchor-id="example-10-building-a-pinn-testbench-with-antigravity">Example 10: Building a PINN Testbench with Antigravity</h2>
+<p>This document outlines how to use <strong>Antigravity</strong> (your agentic coding assistant) to build a robust, modular Physics Informed Neural Network (PINN) framework from scratch.</p>
+<section id="defining-the-core-architecture" class="level3">
+<h3 class="anchored" data-anchor-id="defining-the-core-architecture">1. Defining the Core Architecture</h3>
+<p>Start by asking Antigravity to create a modular structure. A professional PINN testbench requires separation of concerns:</p>
+<ul>
+<li><strong><code>data.py</code></strong>: Handles geometry and point sampling (Collocation, Boundary, Initial conditions).</li>
+<li><strong><code>model.py</code></strong>: Defines the neural network (MLP, ResNet, etc.).</li>
+<li><strong><code>solver.py</code></strong>: The “engine” that computes PDE residuals using automatic differentiation and manages the training loop.</li>
+<li><strong><code>utils.py</code></strong>: Visualization tools for 1D/2D solutions and error metrics.</li>
+</ul>
+<p><strong>Prompt Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Build</span> a modular PINN framework in TensorFlow for solving the Burgers<span class="st">' equation. I need separate files for data handling, model definition, and a solver that uses GradientTape for physics loss.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="implementing-advanced-features" class="level3">
+<h3 class="anchored" data-anchor-id="implementing-advanced-features">2. Implementing Advanced Features</h3>
+<p>Once the basics are working, use Antigravity to implement state-of-the-art components.</p>
+<section id="linear-attention-resnet" class="level4">
+<h4 class="anchored" data-anchor-id="linear-attention-resnet">Linear Attention ResNet</h4>
+<p>Ask Antigravity to implement a more complex architecture like a Linear Attention ResNet to handle global dependencies efficiently.</p>
+<ul>
+<li><strong>Layers</strong>: Multi-head or Linear Attention.</li>
+<li><strong>Input Projection</strong>: High-dimensional coordinate injection.</li>
+</ul>
+</section>
+<section id="reliability-logging" class="level4">
+<h4 class="anchored" data-anchor-id="reliability-logging">Reliability &amp; Logging</h4>
+<p>Request features like <strong>File Logging</strong>, <strong>TensorBoard</strong> integration, and <strong>Model Checkpointing</strong> to ensure you never lose the best performing state.</p>
+<p><strong>Prompt Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Update</span> the solver to support model checkpointing <span class="er">(</span><span class="ex">save</span> best<span class="kw">)</span> <span class="ex">and</span> TensorBoard logging. Also, add a separate evaluation script that loads a model and plots pointwise error heatmaps.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="creating-a-frontend-dashboard" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-frontend-dashboard">3. Creating a Frontend Dashboard</h3>
+<p>Wrap the framework in a <strong>Streamlit</strong> UI to make it interactive. This allows:</p>
+<ul>
+<li>Launching training runs with varying hyperparameters.</li>
+<li>Monitoring live logs and CPU/Resource usage.</li>
+<li>Navigating and comparing past results.</li>
+</ul>
+<p><strong>Prompt Example:</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Build</span> a Streamlit dashboard that lets me launch <span class="st">'train_burgers.py'</span> in the background, monitor its logs live, and visualize the output plots from the results directory.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="key-lessons-from-antigravitys-workflow" class="level3">
+<h3 class="anchored" data-anchor-id="key-lessons-from-antigravitys-workflow">4. Key Lessons from Antigravity’s Workflow</h3>
+<ul>
+<li><strong>Iterative Refinement</strong>: Start with a simple MLP and verify with unit tests before adding Attention or Dashboards.</li>
+<li><strong>Environment Management</strong>: Use Antigravity to set up dedicated Conda environments (<code>conda create -n pinn ...</code>) to avoid dependency conflicts.</li>
+<li><strong>Verification</strong>: Always ask Antigravity to create a <code>test_pinn.py</code> to ensure the mathematical logic (derivatives) is correct early on.</li>
+</ul>
+</section>
+</section>
+<section id="final-thoughts" class="level2">
+<h2 class="anchored" data-anchor-id="final-thoughts">Final thoughts</h2>
+<ul>
+<li><p>To get the best results from an agentic IDE, it can be helpful to move from instructional prompting (“do this”) to architectural prompting (“build a system that functions like this”). You don’t have to be the developer or the project manager, rather think of yourself as the agent orchestration engineer!</p></li>
+<li><p>Try using the Gemini chat interface to make your prompts more strategic, for example you can use this meta-prompt:</p></li>
+</ul>
+<pre><code># Role
+Act as a Lead Prompt Engineer specializing in Google's Antigravity IDE and it's agentic capabilities. Your goal is to write a high-fidelity, instruction-dense prompt that will force Antigravity Agents to utilize their maximum reasoning depth and agentic research tools. 
+# Task
+Write a well-crafted and optimal prompt for input into the Antigravity so the returned output perfectly answers the following query: 
+"[INSERT QUESTION/TOPIC HERE]"</code></pre>
+<ul>
+<li><p>Read the generated artefacts and make changes that suit your needs</p></li>
+<li><p>Be somewhat careful with permissions you give Antigravity. It is very powerful and it can delete things! Browse through the options and think.</p></li>
+<li><p>Experiment and see what works best for you - and share it with the rest of us!</p></li>
+<li><p>Explore using different models for different phases of your workflow, some models are better at different tasks.</p></li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/gdgaiforscience\.github\.io\/CAITG-WinterSchool\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/gdgaiforscience/Build-with-AI/edit/main/session/04-antigravity.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>
