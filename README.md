@@ -25,9 +25,8 @@ git push
 You must also make a `gh-pages` branch and publish the quarto pages to it locally first. Probably better ways to do this:
 ```
 git checkout -n gh-pages
-quarto publish gh-pages
-git push origin gh-pages 
 git checkout main
+quarto publish gh-pages
 ```
 
 On the repo turn on github pages at: https://github.com/gdgaiforscience/Build-with-AI/settings/pages

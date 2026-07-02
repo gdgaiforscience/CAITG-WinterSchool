@@ -1,16 +1,32 @@
 ---
-# title: '**Build with AI**'
+# title: '**Centre for AI, Trust & Governance Winter School**'
 execute: 
   output: false
 ---
 
-![ ](./BwAI-logo.png)
+The [Centre for AI, Trust & Governance (CAITG) AI Winter School](https://www.sydney.edu.au/arts/our-research/centres-institutes-and-groups/centre-for-ai-trust-and-governance.html) is an immersive four-day program hosted at the University of Sydney. Designed for graduate students, postdoctoral scholars, and early career researchers across all disciplines. The AI Winter School will provide practical training in state-of-the-art AI tools, research applications, ethical frameworks, and responsible practice.
 
-Master your AI journey with this 4-part workshop series designed for researchers and academics wanting to Build with AI. Throughout the series, attendees will learn foundational Python and data analysis skills, build Retrieval-Augmented Generation (RAG) pipelines to query custom knowledge bases, develop intelligent AI agents equipped with custom tools, and explore how to accelerate computational research using Google's Antigravity AI-assisted IDE.
+The [Google Developer Group AI for Science](https://gdg.community.dev/gdg-ai-for-science-australia/) is running an AI Masterclass on day two of the School.
+
+## AI Masterclass: Accelerating Research with Trusted AI
+Designed for researchers and professional staff, this full-day hands-on workshop will empower you to integrate advanced AI capabilities into your workflows. You will quickly advance from foundational Python integrations to building robust AI systems you can reuse for your own work. You will learn to construct secure Retrieval-Augmented Generation (RAG) pipelines, develop intelligent autonomous agents, and apply modern computer vision techniques to research data, all while considerate of data privacy and governance standards.
+
+### Session 1: AI Foundations
+We will explore the fundamental concepts required for AI-powered research. Starting with a frictionless technical setup using Google Colab and Google AI Studio, you will learn how to seamlessly integrate machine learning and Python with the Gemini API. 
+
+### Session 2: Customising LLMs: Fine-Tuning vs. RAG
+Unlock the power of Large Language Models on your own private, domain-specific data. We will unpack the critical differences between model Fine-Tuning and Retrieval-Augmented Generation (RAG). You will gain practical experience in tailoring LLMs to securely interrogate custom knowledge bases, ensuring your AI outputs remain accurate, verifiable, and aligned with your data.
+
+### Session 3: Building AI Agents for Research
+In this session, you will learn how to equip AI agents with the specific tools and skills they need to automate complex workflows (such as literature aggregation, data processing, and API calling). We will build intelligent agents that do useful heavy lifting while maintaining vital human-in-the-loop oversight.
+
+### Session 4: Multimodal AI & Applied Computer Vision
+Explore modern approaches to visual data in research. We will dive into computer vision, focusing on object detection and semantic segmentation. You will understand the underlying mechanics of different segmentation approaches, identify key research use cases (from satellite imagery to biomedical scans), and learn how to leverage multimodal models to extract rich, actionable insights from complex visual datasets.
+
 
 ## Register
 
-Register for the series at the [GDG AI for Science](https://gdg.community.dev/events/details/google-gdg-ai-for-science-australia-presents-build-with-ai-python-and-ai-fundamentals/)
+Register for the series at the [CAITG AI Winter School](https://www.sydney.edu.au/arts/our-research/centres-institutes-and-groups/centre-for-ai-trust-and-governance/caitg-ai-winter-school-2026.html)
 
 ![ ](./aiforsci.png)
 
@@ -19,18 +35,13 @@ Join the community (in [Australia](https://gdg.community.dev/gdg-ai-for-science-
 
 
 ## When 
-Every Thursday in May 2026:
 
-* May 7: [Python and AI fundamentals](https://gdg.community.dev/events/details/google-gdg-ai-for-science-australia-presents-build-with-ai-python-and-ai-fundamentals/)
-* May 14: [Tailoring LLMs: RAG and Fine-Tuning](https://gdg.community.dev/events/details/google-gdg-ai-for-science-australia-presents-build-with-ai-tailoring-llms-rag-and-fine-tuning/)
-* May 21: [AI Agents for Research](https://gdg.community.dev/events/details/google-gdg-ai-for-science-australia-presents-build-with-ai-ai-agents-for-research/)
-* May 28: [AI-Assisted Research with Antigravity](https://gdg.community.dev/events/details/google-gdg-ai-for-science-australia-presents-build-with-ai-ai-assisted-research-with-antigravity/)
+Jul 28, 9:00 AM – 5:00 PM
 
-All sessions are independent and can be run in isolation.
 
 ## Target Audience
 
-This workshop sereis is aimed at anyone looking to accelerate their research with AI including:
+This workshop is aimed at anyone looking to accelerate their research with AI including:
 
 * Research students (undergrad, masters, PhD, etc)
 * Researchers requiring AI tools
@@ -42,15 +53,5 @@ Use cases will be grounded in typical scientific workloads.
 ## Requirements
 
 * A Google account to use Google Colab, Kaggle, AI Studio, and Antigravity.
-* Basic familiarlity with Python (or join us for session on May 7 to get everything you need). 
-* **Bonus** - free cloud credits for every attendee!
+* Basic familiarlity with Python. 
 
-
-As our speakers are donating their time, we want to ensure a full and engaged event. Please reserve your spot only if you are committed to joining us for this workshop.
-
-## Recordings
-
-* [Python AI and fundamentals](https://youtu.be/ENOLU_7OkE0)
-* [Tailoring LLMs: RAG and Fine-Tuning](https://youtu.be/pdTt57_pBSo)
-* [AI Agents for Research](https://youtu.be/T1MiU5A7STU)
-* [AI-Assisted Research with Antigravity](https://youtu.be/DxheR7YCH5I) 
