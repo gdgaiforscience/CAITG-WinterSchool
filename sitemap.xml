@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/01-intro.html</loc>
-    <lastmod>2026-07-02T03:34:27.369Z</lastmod>
-  </url>
-  <url>
-    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/02-a-finetune.html</loc>
-    <lastmod>2026-07-02T03:34:27.369Z</lastmod>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/index.html</loc>
+    <lastmod>2026-07-02T04:10:45.530Z</lastmod>
   </url>
   <url>
     <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/02-b-RAG.html</loc>
-    <lastmod>2026-07-02T03:34:27.369Z</lastmod>
-  </url>
-  <url>
-    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/index.html</loc>
-    <lastmod>2026-07-02T03:34:27.360Z</lastmod>
+    <lastmod>2026-07-02T04:10:45.537Z</lastmod>
   </url>
   <url>
     <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/03-agents.html</loc>
-    <lastmod>2026-07-02T03:34:27.373Z</lastmod>
+    <lastmod>2026-07-02T04:10:45.539Z</lastmod>
   </url>
   <url>
-    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/04-antigravity.html</loc>
-    <lastmod>2026-07-02T03:34:27.373Z</lastmod>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/99-a-antigravity.html</loc>
+    <lastmod>2026-07-02T04:10:45.559Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/04-a-cv.html</loc>
+    <lastmod>2026-07-02T04:10:45.543Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/04-c-semantic-segmantation.html</loc>
+    <lastmod>2026-07-02T04:10:45.559Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/04-b-objectdetection.html</loc>
+    <lastmod>2026-07-02T04:10:45.547Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/01-intro.html</loc>
+    <lastmod>2026-07-02T04:10:45.537Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/99-b-ML.html</loc>
+    <lastmod>2026-07-02T04:10:45.568Z</lastmod>
+  </url>
+  <url>
+    <loc>https://gdgaiforscience.github.io/CAITG-WinterSchool/session/02-a-finetune.html</loc>
+    <lastmod>2026-07-02T04:10:45.537Z</lastmod>
   </url>
 </urlset>
