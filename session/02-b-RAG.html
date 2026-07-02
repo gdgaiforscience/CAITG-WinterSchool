@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Build with AI - Tailoring LLMs: RAG and Fine-Tuning – CAITG AI Winter School</title>
+<title>b-rag – CAITG AI Winter School</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -389,7 +389,7 @@ gtag('config', 'G-344M4P3CHH', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul class="collapse">
-  <li><a href="#part-2-retrieval-augmented-generation-rag" id="toc-part-2-retrieval-augmented-generation-rag" class="nav-link active" data-scroll-target="#part-2-retrieval-augmented-generation-rag">Part 2: Retrieval-Augmented Generation (RAG)</a>
+  <li><a href="#retrieval-augmented-generation-rag" id="toc-retrieval-augmented-generation-rag" class="nav-link active" data-scroll-target="#retrieval-augmented-generation-rag">Retrieval-Augmented Generation (RAG)</a>
   <ul class="collapse">
   <li><a href="#fine-tuning-vs.-rag-vs." id="toc-fine-tuning-vs.-rag-vs." class="nav-link" data-scroll-target="#fine-tuning-vs.-rag-vs.">Fine-Tuning vs.&nbsp;RAG | 🧠 vs.&nbsp;📚</a></li>
   <li><a href="#get-started" id="toc-get-started" class="nav-link" data-scroll-target="#get-started">Get started</a></li>
@@ -403,31 +403,15 @@ gtag('config', 'G-344M4P3CHH', { 'anonymize_ip': true});
 <div class="toc-actions"><ul class="collapse"><li><a href="https://github.dev/gdgaiforscience/CAITG-WinterSchool/blob/main/session/02-b-RAG.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title"><strong>Build with AI - Tailoring LLMs: RAG and Fine-Tuning</strong></h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
 
 
 <p><strong>Instructors:</strong> Dr Nate Butterworth (Google XWF)</p>
-<section id="part-2-retrieval-augmented-generation-rag" class="level1">
-<h1>Part 2: Retrieval-Augmented Generation (RAG)</h1>
+<section id="retrieval-augmented-generation-rag" class="level1">
+<h1>Retrieval-Augmented Generation (RAG)</h1>
 <p>…and how it is <del>better/worse/complimentary</del> different to Fine Tuning</p>
 <p>In fine-tuning we update a model’s internal weights to teach it new knowledge. But the process is time-consuming, (computationally) expensive, and the knowledge can become outdated.</p>
 <p>Now, we explore a powerful and complementary technique to adapt LLMs to your data and use-cases: Retrieval-Augmented Generation (RAG).</p>
@@ -463,12 +447,12 @@ gtag('config', 'G-344M4P3CHH', { 'anonymize_ip': true});
 <section id="step-0-prepare-our-environment-and-download-our-modelsdata" class="level2">
 <h2 class="anchored" data-anchor-id="step-0-prepare-our-environment-and-download-our-modelsdata">Step 0: Prepare our environment and download our models/data</h2>
 <p>First let’s get the libraries we need: an LLM model to use for asking questions and generating responses, an “embedding model” that builds a hyper-dimensional network of similarities between “words” and “tokens”, and some data to use as an example.</p>
-<div id="cell-2" class="cell">
+<div id="cell-1" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install -U pip -q</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install keras-hub -U -q #==0.22.1 -U -q</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip install -q tf-keras sentence_transformers #transformers==4.57.1 for embeddinggemma</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="cell-3" class="cell" data-execution_count="1">
+<div id="cell-2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import necessary libraries</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -489,7 +473,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 2026-05-11 10:14:12.633453: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.</code></pre>
 </div>
 </div>
-<div id="cell-4" class="cell" data-execution_count="2">
+<div id="cell-3" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Authenticate with KaggleHub to download models and datasets</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>kagglehub.login()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -498,7 +482,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 </script>
 </div>
 </div>
-<div id="cell-5" class="cell">
+<div id="cell-4" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download the Gemma3 LLM model, the paraphrase embedding model, and a dataset to build our knowledge base</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> kagglehub.model_download(<span class="st">"keras/gemma3/keras/gemma3_instruct_270m/4"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>path_embedding_model <span class="op">=</span> kagglehub.model_download(<span class="st">"astrobutter/paraphrase-minilm-l3-v2/pyTorch/default"</span>)</span>
@@ -510,7 +494,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 <section id="step-1-setup-and-prepare-the-knowledge-base" class="level2">
 <h2 class="anchored" data-anchor-id="step-1-setup-and-prepare-the-knowledge-base">Step 1: Setup and Prepare the Knowledge Base</h2>
 <p>First, we’ll load our libraries and prepare the dataset that will serve as our “textbook” or “knowledge base.”</p>
-<div id="cell-7" class="cell" data-execution_count="4">
+<div id="cell-6" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load knowledge base.</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(path_data<span class="op">+</span><span class="st">"/medquad.csv"</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -535,7 +519,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 <section id="the-embedding-model" class="level3">
 <h3 class="anchored" data-anchor-id="the-embedding-model">The Embedding Model</h3>
 <p>An embedding model is a specialised neural network that reads text and outputs a list of numbers (a vector). Texts with similar meanings will have mathematically similar vectors.</p>
-<div id="cell-9" class="cell" data-execution_count="5">
+<div id="cell-8" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. Load Lightweight Embedding Model ---</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loading sentence embedding model..."</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 'paraphrase-MiniLM-L3-v2' is a small, efficient model suitable for this task.</span></span>
@@ -562,7 +546,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 <section id="creating-the-vector-store" class="level3">
 <h3 class="anchored" data-anchor-id="creating-the-vector-store">Creating the Vector Store</h3>
 <p>The “vector store” (or vector database) is our searchable index of embeddings. For our dataset, we will create a simple in-memory store using a NumPy array. For larger data set you can use tools like FAISS, ChromaDB, or Pinecone.</p>
-<div id="cell-11" class="cell" data-execution_count="6">
+<div id="cell-10" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># %%time</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. Create Vector Store (In-Memory) ---</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Creating embeddings for the vector store..."</span>)</span>
@@ -585,7 +569,7 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 <section id="searching-the-vector-store" class="level3">
 <h3 class="anchored" data-anchor-id="searching-the-vector-store">Searching the Vector Store</h3>
 <p>This is the core of the retrieval step. When a user asks a question, we convert their question into a vector and then search our store for the most similar document vectors.</p>
-<div id="cell-13" class="cell" data-execution_count="7">
+<div id="cell-12" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Vector Similarity Search - "Retrieval" part of RAG. ---</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>example_question <span class="op">=</span> <span class="st">"What is anemia?"</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -619,7 +603,7 @@ What is (are) Anemia in Chronic Kidney Disease ? Anemia is a condition in which 
 <section id="step-3-the-generation---answering-the-question" class="level2">
 <h2 class="anchored" data-anchor-id="step-3-the-generation---answering-the-question">Step 3: The “Generation” - Answering the Question</h2>
 <p>Now that we have retrieved relevant information, we pass it to an LLM (like Gemma) to formulate a final answer.</p>
-<div id="cell-15" class="cell">
+<div id="cell-14" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">## --- Load the Pre-trained Language Model ---</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># We load the base Gemma model. No fine-tuning is needed for RAG.</span></span>
@@ -640,7 +624,7 @@ Wall time: 7.3 s</code></pre>
 <section id="generating-a-baseline-response-without-rag" class="level3">
 <h3 class="anchored" data-anchor-id="generating-a-baseline-response-without-rag">Generating a Baseline Response (Without RAG)</h3>
 <p>First, let’s see what the model answers using only its pre-trained, general knowledge. This is our baseline.</p>
-<div id="cell-17" class="cell" data-execution_count="9">
+<div id="cell-16" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">## Baseline response</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>raw_prompt <span class="op">=</span> <span class="ss">f"""</span></span>
@@ -733,7 +717,7 @@ Wall time: 29.7 s</code></pre>
 <section id="generating-an-augmented-response-with-rag" class="level3">
 <h3 class="anchored" data-anchor-id="generating-an-augmented-response-with-rag">Generating an Augmented Response (With RAG)</h3>
 <p>Now, we’ll use the “augmented” prompt that includes the context we retrieved. This is the generation step of RAG.</p>
-<div id="cell-19" class="cell" data-execution_count="10">
+<div id="cell-18" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co">## 4. Augment the Prompt with Retrieved Context</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>rag_prompt <span class="op">=</span> <span class="ss">f"""</span></span>
