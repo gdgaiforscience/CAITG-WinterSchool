@@ -28,8 +28,6 @@ Explore modern approaches to visual data in research. We will dive into computer
 
 Register for the series at the [CAITG AI Winter School](https://www.sydney.edu.au/arts/our-research/centres-institutes-and-groups/centre-for-ai-trust-and-governance/caitg-ai-winter-school-2026.html)
 
-![ ](./aiforsci.png)
-
 Join the community (in [Australia](https://gdg.community.dev/gdg-ai-for-science-australia/), [Korea](https://gdg.community.dev/gdg-ai-for-science-korea/), [Japan](https://gdg.community.dev/gdg-ai-for-science-japan), or [India](https://gdg.community.dev/gdg-ai-for-science-india/)) for talks, events, collaborations and more.
 
 
@@ -55,3 +53,5 @@ Use cases will be grounded in typical scientific workloads.
 * A Google account to use Google Colab, Kaggle, AI Studio, and Antigravity.
 * Basic familiarlity with Python. 
 
+
+![ ](./aiforsci.png)

@@ -5,7 +5,7 @@ Modify `index.qmd` and files in `./sessions` to update the tutorial pages.
 
 Modify `styles.css`, `custom.scss` and `_quarto.yml` to change the look and feel of the rendered pages.
 
-They will be rendered at: https://gdgaiforscience.github.io/Build-with-AI/
+They will be rendered at: https://gdgaiforscience.github.io/CAITG-WinterSchool/
 
 
 
