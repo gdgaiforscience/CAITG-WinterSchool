@@ -4,7 +4,7 @@ project:
     - styles.css
 
 website:
-  title: "Build with AI" 
+  title: "CAITG AI Winter School" 
   navbar:
     left:
       - href: session/01-intro.ipynb
@@ -17,13 +17,25 @@ website:
             text: RAG
       - href: session/03-agents.ipynb
         text: Agents
-      - href: session/04-antigravity.qmd
-        text: Antigravity
+      - text: "Multimodal AI & Computer Vision"
+        menu:
+          - href: session/04-a-cv.ipynb
+            text: CV Intro
+          - href: session/04-b-objectdetection.ipynb
+            text: Object Detection
+          - href: session/04-c-semantic-segmantation.ipynb
+            text: Semantic Segmentation
+      - text: "Bonus"
+        menu:
+          - href: session/99-a-antigravity.qmd
+            text: Antigravity
+          - href: session/99-b-ML.ipynb
+            text: Machine Learning
   google-analytics:
     tracking-id: "G-344M4P3CHH"
     storage: cookies
     anonymize-ip: true
-  repo-url: https://github.com/gdgaiforscience/Build-with-AI
+  repo-url: https://github.com/gdgaiforscience/CAITG-WinterSchool
   repo-actions: [edit]
 
 format:
