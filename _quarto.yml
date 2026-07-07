@@ -19,11 +19,11 @@ website:
         text: Agents
       - text: "Multimodal AI & Computer Vision"
         menu:
-          - href: session/04-a-cv.ipynb
+          - href: session/04-a-modern-cv.ipynb
             text: CV Intro
-          - href: session/04-b-objectdetection.ipynb
+          - href: session/04-b-modern-objectdetection.ipynb
             text: Object Detection
-          - href: session/04-c-semantic-segmantation.ipynb
+          - href: session/04-c-modern-segmentation.ipynb
             text: Semantic Segmentation
       - text: "Bonus"
         menu:
