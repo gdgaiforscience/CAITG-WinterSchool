@@ -580,7 +580,7 @@ window.Quarto = {
 <li>Adapt a DeepLabV3+ semantic segmentation model to a custom taxonomy.</li>
 <li>Fine-tune both models with Keras and KerasHub using transfer learning.</li>
 </ol>
-<div id="cell-2" class="cell">
+<div id="cell-2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure Keras to use JAX backend CPU/GPU/TPU execution</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"KERAS_BACKEND"</span>] <span class="op">=</span> <span class="st">"jax"</span></span>
@@ -597,7 +597,7 @@ window.Quarto = {
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> keras_hub</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> kagglehub</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="ae311024" class="cell">
+<div id="ae311024" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>IMAGE_SIZE <span class="op">=</span> <span class="dv">640</span> <span class="co"># Native 640</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>BBOX_FORMAT <span class="op">=</span> <span class="st">"xywh"</span>  <span class="co"># [xmin, ymin, width, height] in pixel coordinates</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>DOMAIN_CLASSES <span class="op">=</span> [<span class="st">"Tumor"</span>]  <span class="co"># Custom domain target category</span></span>
@@ -606,57 +606,59 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Select a small representative subset for fast demonstration</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>SUBSET_SIZE <span class="op">=</span> <span class="dv">4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="f39e867f" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation Helper Function for OD</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_bounding_boxes(image, boxes, labels<span class="op">=</span><span class="va">None</span>, class_names<span class="op">=</span><span class="va">None</span>, title<span class="op">=</span><span class="st">"Diagnostic Plot"</span>):</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Renders an image with overlay bounding boxes for visual diagnostic checks.</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    img_disp <span class="op">=</span> np.array(image, dtype<span class="op">=</span><span class="st">"uint8"</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    h_img, w_img <span class="op">=</span> img_disp.shape[:<span class="dv">2</span>]</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    ax.imshow(img_disp)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> [<span class="st">"#4285F4"</span>, <span class="st">"#EA4335"</span>, <span class="st">"#FBBC04"</span>, <span class="st">"#34A853"</span>]</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> boxes <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">len</span>(boxes) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, box <span class="kw">in</span> <span class="bu">enumerate</span>(boxes):</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Ensure coordinates are finite numbers (filter out NaN/Inf from early predictions)</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> np.isfinite(box[:<span class="dv">4</span>]).<span class="bu">all</span>():</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            xmin, ymin, w, h <span class="op">=</span> <span class="bu">float</span>(box[<span class="dv">0</span>]), <span class="bu">float</span>(box[<span class="dv">1</span>]), <span class="bu">float</span>(box[<span class="dv">2</span>]), <span class="bu">float</span>(box[<span class="dv">3</span>])</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Bound boxes within realistic image dimensions to prevent Matplotlib transform overflow</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> w <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> h <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> xmin <span class="op">&lt;</span> <span class="op">-</span>w_img <span class="kw">or</span> ymin <span class="op">&lt;</span> <span class="op">-</span>h_img <span class="kw">or</span> xmin <span class="op">&gt;</span> w_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> ymin <span class="op">&gt;</span> h_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> w <span class="op">&gt;</span> w_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> h <span class="op">&gt;</span> h_img <span class="op">*</span> <span class="dv">2</span>:</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Clip rectangle coordinates for clean visualization display</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            xmin_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">0.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(w_img <span class="op">-</span> <span class="dv">1</span>), xmin))</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            ymin_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">0.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(h_img <span class="op">-</span> <span class="dv">1</span>), ymin))</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>            w_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">1.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(w_img <span class="op">-</span> xmin_c), w))</span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            h_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">1.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(h_img <span class="op">-</span> ymin_c), h))</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> colors[idx <span class="op">%</span> <span class="bu">len</span>(colors)]</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>            rect <span class="op">=</span> patches.Rectangle(</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                (xmin_c, ymin_c), w_c, h_c,</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                linewidth<span class="op">=</span><span class="fl">2.5</span>, edgecolor<span class="op">=</span>color, facecolor<span class="op">=</span><span class="st">"none"</span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>            ax.add_patch(rect)</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> labels <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> idx <span class="op">&lt;</span> <span class="bu">len</span>(labels):</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                lbl_idx <span class="op">=</span> <span class="bu">int</span>(labels[idx])</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> lbl_idx <span class="op">&gt;=</span> <span class="dv">0</span>:</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>                    lbl_text <span class="op">=</span> class_names[lbl_idx] <span class="cf">if</span> class_names <span class="kw">and</span> lbl_idx <span class="op">&lt;</span> <span class="bu">len</span>(class_names) <span class="cf">else</span> <span class="ss">f"Class </span><span class="sc">{</span>lbl_idx<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                    ax.text(</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                        xmin_c, <span class="bu">max</span>(<span class="fl">15.0</span>, ymin_c <span class="op">-</span> <span class="fl">5.0</span>), lbl_text,</span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>                        color<span class="op">=</span><span class="st">"white"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, weight<span class="op">=</span><span class="st">"bold"</span>,</span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                        bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"square,pad=0.2"</span>, facecolor<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.85</span>)</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>                    )</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">13</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="f39e867f" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Diagnostic Visualisation Helper Function</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_bounding_boxes(image, boxes, labels<span class="op">=</span><span class="va">None</span>, class_names<span class="op">=</span><span class="va">None</span>, title<span class="op">=</span><span class="st">"Diagnostic Plot"</span>):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Renders an image with overlay bounding boxes for visual diagnostic checks.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    img_disp <span class="op">=</span> np.array(image, dtype<span class="op">=</span><span class="st">"uint8"</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    h_img, w_img <span class="op">=</span> img_disp.shape[:<span class="dv">2</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    ax.imshow(img_disp)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> [<span class="st">"#4285F4"</span>, <span class="st">"#EA4335"</span>, <span class="st">"#FBBC04"</span>, <span class="st">"#34A853"</span>]</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> boxes <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="bu">len</span>(boxes) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, box <span class="kw">in</span> <span class="bu">enumerate</span>(boxes):</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Ensure coordinates are finite numbers (filter out NaN/Inf from early predictions)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> np.isfinite(box[:<span class="dv">4</span>]).<span class="bu">all</span>():</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            xmin, ymin, w, h <span class="op">=</span> <span class="bu">float</span>(box[<span class="dv">0</span>]), <span class="bu">float</span>(box[<span class="dv">1</span>]), <span class="bu">float</span>(box[<span class="dv">2</span>]), <span class="bu">float</span>(box[<span class="dv">3</span>])</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Bound boxes within realistic image dimensions to prevent Matplotlib transform overflow</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> w <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> h <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> xmin <span class="op">&lt;</span> <span class="op">-</span>w_img <span class="kw">or</span> ymin <span class="op">&lt;</span> <span class="op">-</span>h_img <span class="kw">or</span> xmin <span class="op">&gt;</span> w_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> ymin <span class="op">&gt;</span> h_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> w <span class="op">&gt;</span> w_img <span class="op">*</span> <span class="dv">2</span> <span class="kw">or</span> h <span class="op">&gt;</span> h_img <span class="op">*</span> <span class="dv">2</span>:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Clip rectangle coordinates for clean visualization display</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>            xmin_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">0.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(w_img <span class="op">-</span> <span class="dv">1</span>), xmin))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            ymin_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">0.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(h_img <span class="op">-</span> <span class="dv">1</span>), ymin))</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            w_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">1.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(w_img <span class="op">-</span> xmin_c), w))</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>            h_c <span class="op">=</span> <span class="bu">max</span>(<span class="fl">1.0</span>, <span class="bu">min</span>(<span class="bu">float</span>(h_img <span class="op">-</span> ymin_c), h))</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> colors[idx <span class="op">%</span> <span class="bu">len</span>(colors)]</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>            rect <span class="op">=</span> patches.Rectangle(</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                (xmin_c, ymin_c), w_c, h_c,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                linewidth<span class="op">=</span><span class="fl">2.5</span>, edgecolor<span class="op">=</span>color, facecolor<span class="op">=</span><span class="st">"none"</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>            ax.add_patch(rect)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> labels <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> idx <span class="op">&lt;</span> <span class="bu">len</span>(labels):</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>                lbl_idx <span class="op">=</span> <span class="bu">int</span>(labels[idx])</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> lbl_idx <span class="op">&gt;=</span> <span class="dv">0</span>:</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                    lbl_text <span class="op">=</span> class_names[lbl_idx] <span class="cf">if</span> class_names <span class="kw">and</span> lbl_idx <span class="op">&lt;</span> <span class="bu">len</span>(class_names) <span class="cf">else</span> <span class="ss">f"Class </span><span class="sc">{</span>lbl_idx<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>                    ax.text(</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                        xmin_c, <span class="bu">max</span>(<span class="fl">15.0</span>, ymin_c <span class="op">-</span> <span class="fl">5.0</span>), lbl_text,</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>                        color<span class="op">=</span><span class="st">"white"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, weight<span class="op">=</span><span class="st">"bold"</span>,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>                        bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"square,pad=0.2"</span>, facecolor<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.85</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">13</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="35cc231f" class="cell">
+<div id="35cc231f" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Zero-Shot Baseline Inference </span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># -----------------------------------------------------------------------------</span></span>
@@ -668,431 +670,603 @@ window.Quarto = {
 </div>
 <div id="cell-6" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># example zero-shot image (for known classes)</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>image_url <span class="op">=</span> <span class="st">"https://storage.googleapis.com/keras-cv/models/paligemma/cow_beach_1.png"</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the image and get it in the correct format</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Download an example image, load it, and get it in the correct format</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>image_url <span class="op">=</span> <span class="st">"https://storage.googleapis.com/keras-cv/models/paligemma/cow_beach_1.png"</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>image_path <span class="op">=</span> keras.utils.get_file(origin<span class="op">=</span>image_url)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> keras.utils.load_img(image_path)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>image <span class="op">=</span> keras.utils.load_img(image_path).resize((IMAGE_SIZE, IMAGE_SIZE))</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>image_batch <span class="op">=</span> np.expand_dims(keras.utils.img_to_array(image), axis<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Make the predcition!</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Make the prediction</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>coco_preds <span class="op">=</span> baseline_detector.predict(image_batch)</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>coco_img_np[<span class="dv">0</span>],</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>coco_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>],</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>coco_preds[<span class="st">"labels"</span>][<span class="dv">0</span>],</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"RetinaNet image it has a class for"</span>,</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot it!</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>image_batch[<span class="dv">0</span>],</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>coco_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>],</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>coco_preds[<span class="st">"labels"</span>][<span class="dv">0</span>],</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"RetinaNet image it has a class for"</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">1/1</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">7s</span> 7s/step
+</pre>
 </div>
-<div id="cell-7" class="cell">
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-6-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download an example dataset</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dataset_path <span class="op">=</span> kagglehub.dataset_download(<span class="st">"pkdarabi/brain-tumor-image-dataset-semantic-segmentation"</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>dataset_path<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/usr/local/google/home/butterworthnat/.cache/kagglehub/datasets/pkdarabi/brain-tumor-image-dataset-semantic-segmentation/versions/1</code></pre>
+</div>
 </div>
 <p>Reading COCO-formatted (<em>whatever format your data is in</em>) data into Keras (<em>whatever framework you are using</em>) requires data wrangling to parse the data labels/annotation/folder/file structure and adapting them to what RetinaNet (<em>whatever deep learning model</em>) expects.</p>
 <p>For example we must consider:</p>
 <p>Bounding Box Coordinates: COCO uses [x_min, y_min, width, height] in raw pixels. Most Keras models and loss functions expect bounding boxes formatted as [y_min, x_min, y_max, x_max] (often normalized between 0.0 and 1.0).</p>
 <p>Category ID Gaps: Standard COCO has 80 categories, but their IDs span from 1 to 90 (e.g., ID 12 is skipped). You must remap these to contiguous indices (0 to 79) so Keras doesn’t run into index out-of-bounds errors.</p>
 <p>There are various helper-functions and packages but we will just roll our own for completeness.</p>
-<div id="cell-9" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Wrangle the data!</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Parse JSON and map annotations directly to images</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>anno_path <span class="op">=</span> os.path.join(dataset_path, <span class="st">"train"</span>, <span class="st">"_annotations.coco.json"</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(anno_path, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    coco_data <span class="op">=</span> json.load(f)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a dictionary of all the images</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>img_dict <span class="op">=</span> {img[<span class="st">"id"</span>]: img <span class="cf">for</span> img <span class="kw">in</span> coco_data[<span class="st">"images"</span>]}</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a corresponding dictionary of all the annotations (labels, bounding boxes)</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>anno_dict <span class="op">=</span> {}</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> anno <span class="kw">in</span> coco_data[<span class="st">"annotations"</span>]:</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    img_id <span class="op">=</span> anno[<span class="st">"image_id"</span>]</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    bbox <span class="op">=</span> anno[<span class="st">"bbox"</span>]  <span class="co"># [xmin, ymin, width, height]</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    category_id <span class="op">=</span> anno[<span class="st">"category_id"</span>]</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> img_id <span class="kw">not</span> <span class="kw">in</span> anno_dict:</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        anno_dict[img_id] <span class="op">=</span> []</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    anno_dict[img_id].append((bbox, category_id))</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total annotated images found in COCO file: </span><span class="sc">{</span><span class="bu">len</span>(anno_dict)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Subset the data (just to make the example go faster)</span></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>selected_img_ids <span class="op">=</span> <span class="bu">list</span>(anno_dict.keys())[:SUBSET_SIZE]</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>images_list <span class="op">=</span> []</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>boxes_list <span class="op">=</span> []</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>labels_list <span class="op">=</span> []</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine maximum detected object bounding boxes per image in subset for uniform data shapes</span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>max_boxes <span class="op">=</span> <span class="bu">max</span>(<span class="bu">len</span>(anno_dict[img_id]) <span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids)</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids:</span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    img_info <span class="op">=</span> img_dict[img_id]</span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    file_name <span class="op">=</span> img_info[<span class="st">"file_name"</span>]</span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    img_file_path <span class="op">=</span> os.path.join(dataset_path, <span class="st">"train"</span>, file_name)</span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load and resize image to standard input dimensions (640x640)</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    pil_img <span class="op">=</span> Image.<span class="bu">open</span>(img_file_path).convert(<span class="st">"RGB"</span>).resize((IMAGE_SIZE, IMAGE_SIZE))</span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    orig_w, orig_h <span class="op">=</span> img_info[<span class="st">"width"</span>], img_info[<span class="st">"height"</span>]</span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    scale_x <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_w</span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    scale_y <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_h</span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Add all the objects (and their bounding boxes and class label) in each image</span></span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    img_boxes <span class="op">=</span> []</span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    img_labels <span class="op">=</span> []</span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bbox, _ <span class="kw">in</span> anno_dict[img_id]:</span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        xmin, ymin, w, h <span class="op">=</span> bbox</span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        img_boxes.append([xmin <span class="op">*</span> scale_x, ymin <span class="op">*</span> scale_y, w <span class="op">*</span> scale_x, h <span class="op">*</span> scale_y])</span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>        img_labels.append(<span class="dv">0</span>)  <span class="co"># Index 0 corresponding to DOMAIN_CLASSES[0]</span></span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pad any "missing" object bounding boxes (-1 for background/padding label)</span></span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(img_boxes) <span class="op">&lt;</span> max_boxes:</span>
-<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>        img_boxes.append([<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
-<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>        img_labels.append(<span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>    images_list.append(np.array(pil_img, dtype<span class="op">=</span><span class="st">"float32"</span>))</span>
-<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>    boxes_list.append(img_boxes)</span>
-<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>    labels_list.append(img_labels)</span>
-<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the image, bounding boxes, and class labels into the correct format we need</span></span>
-<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>train_images <span class="op">=</span> np.array(images_list, dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
-<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>train_boxes <span class="op">=</span> np.array(boxes_list, dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
-<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>train_classes <span class="op">=</span> np.array(labels_list, dtype<span class="op">=</span><span class="st">"int32"</span>)</span>
-<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>train_targets <span class="op">=</span> {</span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"boxes"</span>: train_boxes,</span>
-<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"labels"</span>: train_classes,</span>
-<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Images: </span><span class="sc">{</span>train_images<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Bounding Boxes: </span><span class="sc">{</span>train_boxes<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Class Labels: </span><span class="sc">{</span>train_classes<span class="sc">.</span>shape<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-9" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Wrangle the data!</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Parse JSON and map annotations directly to images</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>anno_path <span class="op">=</span> os.path.join(dataset_path, <span class="st">"train"</span>, <span class="st">"_annotations.coco.json"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(anno_path, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    coco_data <span class="op">=</span> json.load(f)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a dictionary of all the images</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>img_dict <span class="op">=</span> {img[<span class="st">"id"</span>]: img <span class="cf">for</span> img <span class="kw">in</span> coco_data[<span class="st">"images"</span>]}</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a corresponding dictionary of all the annotations (labels, bounding boxes)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>anno_dict <span class="op">=</span> {}</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> anno <span class="kw">in</span> coco_data[<span class="st">"annotations"</span>]:</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    img_id <span class="op">=</span> anno[<span class="st">"image_id"</span>]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    bbox <span class="op">=</span> anno[<span class="st">"bbox"</span>]  <span class="co"># [xmin, ymin, width, height]</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    category_id <span class="op">=</span> anno[<span class="st">"category_id"</span>]</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> img_id <span class="kw">not</span> <span class="kw">in</span> anno_dict:</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        anno_dict[img_id] <span class="op">=</span> []</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    anno_dict[img_id].append((bbox, category_id))</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total annotated images found in COCO file: </span><span class="sc">{</span><span class="bu">len</span>(anno_dict)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Subset the data (just to make the example go faster)</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>selected_img_ids <span class="op">=</span> <span class="bu">list</span>(anno_dict.keys())[:SUBSET_SIZE]</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>images_list <span class="op">=</span> []</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>boxes_list <span class="op">=</span> []</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>labels_list <span class="op">=</span> []</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine maximum detected object bounding boxes per image in subset for uniform data shapes</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>max_boxes <span class="op">=</span> <span class="bu">max</span>(<span class="bu">len</span>(anno_dict[img_id]) <span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids:</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    img_info <span class="op">=</span> img_dict[img_id]</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    file_name <span class="op">=</span> img_info[<span class="st">"file_name"</span>]</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    img_file_path <span class="op">=</span> os.path.join(dataset_path, <span class="st">"train"</span>, file_name)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load and resize image to standard input dimensions (640x640)</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    pil_img <span class="op">=</span> Image.<span class="bu">open</span>(img_file_path).convert(<span class="st">"RGB"</span>).resize((IMAGE_SIZE, IMAGE_SIZE))</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    orig_w, orig_h <span class="op">=</span> img_info[<span class="st">"width"</span>], img_info[<span class="st">"height"</span>]</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    scale_x <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_w</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    scale_y <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_h</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Add all the objects (and their bounding boxes and class label) in each image</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    img_boxes <span class="op">=</span> []</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    img_labels <span class="op">=</span> []</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bbox, _ <span class="kw">in</span> anno_dict[img_id]:</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        xmin, ymin, w, h <span class="op">=</span> bbox</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        img_boxes.append([xmin <span class="op">*</span> scale_x, ymin <span class="op">*</span> scale_y, w <span class="op">*</span> scale_x, h <span class="op">*</span> scale_y])</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        img_labels.append(<span class="dv">0</span>)  <span class="co"># Index 0 corresponding to DOMAIN_CLASSES[0]</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Pad any "missing" object bounding boxes (-1 for background/padding label)</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(img_boxes) <span class="op">&lt;</span> max_boxes:</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        img_boxes.append([<span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        img_labels.append(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    images_list.append(np.array(pil_img, dtype<span class="op">=</span><span class="st">"float32"</span>))</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    boxes_list.append(img_boxes)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    labels_list.append(img_labels)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Put the image, bounding boxes, and class labels into the correct format we need</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>train_images <span class="op">=</span> np.array(images_list, dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>train_boxes <span class="op">=</span> np.array(boxes_list, dtype<span class="op">=</span><span class="st">"float32"</span>)</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>train_classes <span class="op">=</span> np.array(labels_list, dtype<span class="op">=</span><span class="st">"int32"</span>)</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>train_targets <span class="op">=</span> {</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"boxes"</span>: train_boxes,</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">"labels"</span>: train_classes,</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Images: </span><span class="sc">{</span>train_images<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Bounding Boxes: </span><span class="sc">{</span>train_boxes<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Class Labels: </span><span class="sc">{</span>train_classes<span class="sc">.</span>shape<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total annotated images found in COCO file: 1501
+Images: (4, 640, 640, 3)
+Bounding Boxes: (4, 1, 4)
+Class Labels: (4, 1)
+</code></pre>
 </div>
-<div id="cell-10" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>train_boxes[<span class="dv">0</span>],</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>train_classes[<span class="dv">0</span>],</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    class_names<span class="op">=</span>DOMAIN_CLASSES,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Ground Truth Example - e.g. human label we are aiming for"</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="b7b382ca" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the image through the model! Make a prediction.</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>baseline_preds <span class="op">=</span> baseline_detector.predict(train_images[:<span class="dv">1</span>])</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"First predicted bbox: </span><span class="sc">{</span>baseline_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"First predicted label: </span><span class="sc">{</span>baseline_preds[<span class="st">"labels"</span>][<span class="dv">0</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>baseline_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>],</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>baseline_preds[<span class="st">"labels"</span>][<span class="dv">0</span>],</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Zero-shot failure on unknown tumor class - no detections"</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cell-10" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>train_boxes[<span class="dv">0</span>],</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>train_classes[<span class="dv">0</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    class_names<span class="op">=</span>DOMAIN_CLASSES,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Ground Truth Example - e.g. human label we are aiming for"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
-<div id="cell-12" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the pre-trained Feature Pyramid Network (FPN) and Box Head.</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>custom_detector <span class="op">=</span> keras_hub.models.RetinaNetObjectDetector.from_preset(</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retinanet_resnet50_fpn_v2_coco"</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    num_classes<span class="op">=</span>NUM_CLASSES, </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    bounding_box_format<span class="op">=</span>BBOX_FORMAT,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile with options </span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>custom_detector.<span class="bu">compile</span>(</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>keras.optimizers.Adam(learning_rate<span class="op">=</span><span class="fl">1e-5</span>),</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    box_loss<span class="op">=</span>keras.losses.Huber(delta<span class="op">=</span><span class="fl">1.0</span>, reduction<span class="op">=</span><span class="st">"sum"</span>),</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    classification_loss<span class="op">=</span>keras.losses.BinaryFocalCrossentropy(reduction<span class="op">=</span><span class="st">"sum"</span>),</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="2dbc56c3" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> custom_detector.fit(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>train_images,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>train_targets,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">20</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  - Fine-tuning complete! Final Loss: </span><span class="sc">{</span>history<span class="sc">.</span>history[<span class="st">'loss'</span>][<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="b355090c" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the results</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>tuned_preds <span class="op">=</span> custom_detector.predict(train_images[:<span class="dv">1</span>])</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prediction confidence: </span><span class="sc">{</span>tuned_preds[<span class="st">"confidence"</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>tuned_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>][<span class="dv">0</span>:<span class="dv">2</span>],</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>tuned_preds[<span class="st">"labels"</span>][<span class="dv">0</span>][<span class="dv">0</span>:<span class="dv">2</span>],</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    class_names<span class="op">=</span>DOMAIN_CLASSES,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Fine-Tuned Model Prediction"</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="b7b382ca" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the image through the model! Make a prediction.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>baseline_preds <span class="op">=</span> baseline_detector.predict(train_images[:<span class="dv">1</span>])</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"First predicted bbox: </span><span class="sc">{</span>baseline_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"First predicted label: </span><span class="sc">{</span>baseline_preds[<span class="st">"labels"</span>][<span class="dv">0</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>baseline_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>],</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>baseline_preds[<span class="st">"labels"</span>][<span class="dv">0</span>],</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Zero-shot failure on unknown tumor class - no detections"</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">1/1</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">7s</span> 7s/step
+
+First predicted bbox: [-1. -1.  0.  0.]
+
+First predicted label: -1
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-10-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the pre-trained Feature Pyramid Network (FPN) and Box Head.</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>custom_detector <span class="op">=</span> keras_hub.models.RetinaNetObjectDetector.from_preset(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retinanet_resnet50_fpn_v2_coco"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    num_classes<span class="op">=</span>NUM_CLASSES, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    bounding_box_format<span class="op">=</span>BBOX_FORMAT,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile with options </span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>custom_detector.<span class="bu">compile</span>(</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>keras.optimizers.Adam(learning_rate<span class="op">=</span><span class="fl">1e-5</span>),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    box_loss<span class="op">=</span>keras.losses.Huber(delta<span class="op">=</span><span class="fl">1.0</span>, reduction<span class="op">=</span><span class="st">"sum"</span>),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    classification_loss<span class="op">=</span>keras.losses.BinaryFocalCrossentropy(reduction<span class="op">=</span><span class="st">"sum"</span>),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="2dbc56c3" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> custom_detector.fit(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>train_images,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>train_targets,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"  - Fine-tuning complete! Final Loss: </span><span class="sc">{</span>history<span class="sc">.</span>history[<span class="st">'loss'</span>][<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/google/home/butterworthnat/miniforge3/envs/caigt/lib/python3.12/site-packages/keras/src/trainers/epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
+  self.data_adapter = data_adapters.get_data_adapter(</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">2/2</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">45s</span> 14s/step - bbox_regression_loss: 2.0324 - cls_logits_loss: 15996.2412 - loss: 15998.2734  
+
+  - Fine-tuning complete! Final Loss: 15998.2734
+</pre>
+</div>
+</div>
+</div>
+<div id="b355090c" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the results</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>tuned_preds <span class="op">=</span> custom_detector.predict(train_images[:<span class="dv">1</span>])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Prediction confidence: </span><span class="sc">{</span>tuned_preds[<span class="st">"confidence"</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>plot_bounding_boxes(</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    boxes<span class="op">=</span>tuned_preds[<span class="st">"boxes"</span>][<span class="dv">0</span>][<span class="dv">0</span>:<span class="dv">2</span>],</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>tuned_preds[<span class="st">"labels"</span>][<span class="dv">0</span>][<span class="dv">0</span>:<span class="dv">2</span>],</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    class_names<span class="op">=</span>DOMAIN_CLASSES,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Fine-Tuned Model Prediction"</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">1/1</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">1s</span> 957ms/step
+
+Prediction confidence: [0.9999999  0.9999999  0.9999969  0.9999944  0.9999753  0.9998988
+
+ 0.9998344  0.99980074 0.999684   0.9995535  0.9995233  0.99949837
+
+ 0.9992483  0.9989209  0.99883956 0.99795985 0.9976776  0.9973821
+
+ 0.997292   0.9971507  0.9968291  0.99632734 0.9959144  0.99550444
+
+ 0.995449   0.995376   0.9952798  0.99490875 0.9946765  0.99434423
+
+ 0.99424696 0.9939276  0.993707   0.9936655  0.993461   0.99341416
+
+ 0.9933831  0.9931125  0.99256283 0.99162805 0.9915359  0.9914601
+
+ 0.99121183 0.99083155 0.99067664 0.99053967 0.9904771  0.99019825
+
+ 0.98997074 0.9897008  0.9893728  0.9893243  0.9892972  0.9891857
+
+ 0.98917925 0.98883116 0.9888082  0.98867244 0.9877078  0.9876466
+
+ 0.98741186 0.98737574 0.98729104 0.987259   0.98722726 0.9871918
+
+ 0.98707217 0.9869376  0.98693335 0.98691726 0.98687404 0.98687345
+
+ 0.9868314  0.986749   0.9866555  0.9863978  0.98632425 0.98630095
+
+ 0.98603976 0.9859244  0.985693   0.9856323  0.98562974 0.9855479
+
+ 0.98523605 0.9852153  0.98521096 0.9849539  0.98491454 0.98458546
+
+ 0.98450327 0.9842949  0.9841995  0.9840973  0.98377854 0.983556
+
+ 0.9834188  0.9833484  0.98331094 0.98327017]
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-13-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 </section>
 <section id="semantic-segmentation-with-deeplabv3" class="level2">
 <h2 class="anchored" data-anchor-id="semantic-segmentation-with-deeplabv3">Semantic Segmentation with DeepLabV3+</h2>
-<div id="cd3d1286" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> ImageDraw</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert COCO Annotations into 2D Pixel Target Masks</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>SEG_CLASSES <span class="op">=</span> [<span class="st">"Background"</span>, <span class="st">"Tumor"</span>]</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>SEG_NUM_CLASSES <span class="op">=</span> <span class="bu">len</span>(SEG_CLASSES)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>train_masks_list <span class="op">=</span> []</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids:</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a blank 8-bit black mask (0 = Background) matching IMAGE_SIZE (640x640)</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    mask_img <span class="op">=</span> Image.new(<span class="st">"L"</span>, (IMAGE_SIZE, IMAGE_SIZE), <span class="dv">0</span>)</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    draw <span class="op">=</span> ImageDraw.Draw(mask_img)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    img_info <span class="op">=</span> img_dict[img_id]</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    orig_w, orig_h <span class="op">=</span> img_info[<span class="st">"width"</span>], img_info[<span class="st">"height"</span>]</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    scale_x <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_w</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    scale_y <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_h</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rasterize bounding box regions as filled mask regions (1 = Tumor)</span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bbox, _ <span class="kw">in</span> anno_dict[img_id]:</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        xmin, ymin, w, h <span class="op">=</span> bbox</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        x0, y0 <span class="op">=</span> xmin <span class="op">*</span> scale_x, ymin <span class="op">*</span> scale_y</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        x1, y1 <span class="op">=</span> x0 <span class="op">+</span> (w <span class="op">*</span> scale_x), y0 <span class="op">+</span> (h <span class="op">*</span> scale_y)</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        draw.rectangle([x0, y0, x1, y1], fill<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    train_masks_list.append(np.array(mask_img, dtype<span class="op">=</span><span class="st">"int32"</span>))</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>train_masks <span class="op">=</span> np.array(train_masks_list, dtype<span class="op">=</span><span class="st">"int32"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="cd3d1286" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> ImageDraw</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert COCO Annotations into 2D Pixel Target Masks</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>SEG_CLASSES <span class="op">=</span> [<span class="st">"Background"</span>, <span class="st">"Tumor"</span>]</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>SEG_NUM_CLASSES <span class="op">=</span> <span class="bu">len</span>(SEG_CLASSES)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>train_masks_list <span class="op">=</span> []</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img_id <span class="kw">in</span> selected_img_ids:</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a blank 8-bit black mask (0 = Background) matching IMAGE_SIZE (640x640)</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    mask_img <span class="op">=</span> Image.new(<span class="st">"L"</span>, (IMAGE_SIZE, IMAGE_SIZE), <span class="dv">0</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    draw <span class="op">=</span> ImageDraw.Draw(mask_img)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    img_info <span class="op">=</span> img_dict[img_id]</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    orig_w, orig_h <span class="op">=</span> img_info[<span class="st">"width"</span>], img_info[<span class="st">"height"</span>]</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    scale_x <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_w</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    scale_y <span class="op">=</span> IMAGE_SIZE <span class="op">/</span> orig_h</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rasterize bounding box regions as filled mask regions (1 = Tumor)</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bbox, _ <span class="kw">in</span> anno_dict[img_id]:</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        xmin, ymin, w, h <span class="op">=</span> bbox</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        x0, y0 <span class="op">=</span> xmin <span class="op">*</span> scale_x, ymin <span class="op">*</span> scale_y</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        x1, y1 <span class="op">=</span> x0 <span class="op">+</span> (w <span class="op">*</span> scale_x), y0 <span class="op">+</span> (h <span class="op">*</span> scale_y)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        draw.rectangle([x0, y0, x1, y1], fill<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    train_masks_list.append(np.array(mask_img, dtype<span class="op">=</span><span class="st">"int32"</span>))</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>train_masks <span class="op">=</span> np.array(train_masks_list, dtype<span class="op">=</span><span class="st">"int32"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="ddbd57d2" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation Helper Function for Semantic Segmentation</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_segmentation_comparison(image, ground_truth, prediction, title<span class="op">=</span><span class="st">"Segmentation Result"</span>):</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span>))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    img_disp <span class="op">=</span> np.array(image, dtype<span class="op">=</span><span class="st">"uint8"</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].imshow(img_disp)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_title(<span class="st">"Input MRI Scan"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].axis(<span class="st">"off"</span>)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].imshow(img_disp)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].imshow(ground_truth, cmap<span class="op">=</span><span class="st">"jet"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_title(<span class="st">"Ground Truth Mask"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].axis(<span class="st">"off"</span>)</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].imshow(img_disp)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].imshow(prediction, cmap<span class="op">=</span><span class="st">"jet"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].set_title(<span class="st">"DeepLabV3+ Predicted Mask"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].axis(<span class="st">"off"</span>)</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(title, fontsize<span class="op">=</span><span class="dv">14</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="ddbd57d2" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation Helper Function for Semantic Segmentation</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_segmentation_comparison(image, ground_truth, prediction, title<span class="op">=</span><span class="st">"Segmentation Result"</span>):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">5</span>))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    img_disp <span class="op">=</span> np.array(image, dtype<span class="op">=</span><span class="st">"uint8"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].imshow(img_disp)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_title(<span class="st">"Input MRI Scan"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].imshow(img_disp)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].imshow(ground_truth, cmap<span class="op">=</span><span class="st">"jet"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_title(<span class="st">"Ground Truth Mask"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].imshow(img_disp)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].imshow(prediction, cmap<span class="op">=</span><span class="st">"jet"</span>, alpha<span class="op">=</span><span class="fl">0.45</span>, vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].set_title(<span class="st">"DeepLabV3+ Predicted Mask"</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].axis(<span class="st">"off"</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(title, fontsize<span class="op">=</span><span class="dv">14</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="f1a929b5" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load DeepLabV3+ Segmenter</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>custom_segmenter <span class="op">=</span> keras_hub.models.DeepLabV3ImageSegmenter.from_preset(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"deeplab_v3_plus_resnet50_pascalvoc"</span>,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    num_classes<span class="op">=</span>SEG_NUM_CLASSES,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="f1a929b5" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load DeepLabV3+ Segmenter</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>custom_segmenter <span class="op">=</span> keras_hub.models.DeepLabV3ImageSegmenter.from_preset(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"deeplab_v3_plus_resnet50_pascalvoc"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    num_classes<span class="op">=</span>SEG_NUM_CLASSES,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Downloading to /usr/local/google/home/butterworthnat/.cache/kagglehub/models/keras/deeplabv3plus/keras/deeplab_v3_plus_resnet50_pascalvoc/4/config.json...</code></pre>
 </div>
-<div id="e53bb548" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Align the preprocessor (trained on 512x512 images) to match our 640x640 images </span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>custom_segmenter.preprocessor.image_converter.image_size <span class="op">=</span> (IMAGE_SIZE, IMAGE_SIZE)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile using SparseCategoricalCrossentropy (for integer sparse masks)</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>custom_segmenter.<span class="bu">compile</span>(</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>keras.optimizers.Adam(learning_rate<span class="op">=</span><span class="fl">1e-4</span>),</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span>keras.losses.SparseCategoricalCrossentropy(from_logits<span class="op">=</span><span class="va">True</span>),</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    metrics<span class="op">=</span>[keras.metrics.SparseCategoricalAccuracy(name<span class="op">=</span><span class="st">"pixel_accuracy"</span>)],</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 1.71k/1.71k [00:00&lt;00:00, 2.50MB/s]</code></pre>
 </div>
-<div id="78552038" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Fine-Tune DeepLabV3+ </span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Starting DeepLabV3+ Fine-Tuning Loop..."</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>seg_history <span class="op">=</span> custom_segmenter.fit(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>train_images,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>train_masks,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">15</span>,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Fine-Tuning Complete! Final Loss: </span><span class="sc">{</span>seg_history<span class="sc">.</span>history[<span class="st">'loss'</span>][<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Downloading to /usr/local/google/home/butterworthnat/.cache/kagglehub/models/keras/deeplabv3plus/keras/deeplab_v3_plus_resnet50_pascalvoc/4/task.json...</code></pre>
 </div>
-<div id="9a3ad5d9" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the inference</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pred_logits <span class="op">=</span> custom_segmenter.predict(train_images[:<span class="dv">1</span>])</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert 3D class logits (H, W, num_classes) to 2D categorical class map (H, W)</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>pred_mask <span class="op">=</span> np.argmax(pred_logits[<span class="dv">0</span>], axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>plot_segmentation_comparison(</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    ground_truth<span class="op">=</span>train_masks[<span class="dv">0</span>],</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    prediction<span class="op">=</span>pred_mask,</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Fine-Tuned DeepLabV3+ Segmentation Result"</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 4.32k/4.32k [00:00&lt;00:00, 6.37MB/s]</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Downloading to /usr/local/google/home/butterworthnat/.cache/kagglehub/models/keras/deeplabv3plus/keras/deeplab_v3_plus_resnet50_pascalvoc/4/task.weights.h5...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 299M/299M [00:21&lt;00:00, 14.3MB/s] </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Downloading to /usr/local/google/home/butterworthnat/.cache/kagglehub/models/keras/deeplabv3plus/keras/deeplab_v3_plus_resnet50_pascalvoc/4/model.weights.h5...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 150M/150M [00:13&lt;00:00, 11.6MB/s] </code></pre>
+</div>
+</div>
+<div id="e53bb548" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Align the preprocessor (trained on 512x512 images) to match our 640x640 images </span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>custom_segmenter.preprocessor.image_converter.image_size <span class="op">=</span> (IMAGE_SIZE, IMAGE_SIZE)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compile using SparseCategoricalCrossentropy (for integer sparse masks)</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>custom_segmenter.<span class="bu">compile</span>(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>keras.optimizers.Adam(learning_rate<span class="op">=</span><span class="fl">1e-4</span>),</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span>keras.losses.SparseCategoricalCrossentropy(from_logits<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    metrics<span class="op">=</span>[keras.metrics.SparseCategoricalAccuracy(name<span class="op">=</span><span class="st">"pixel_accuracy"</span>)],</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="78552038" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Fine-Tune DeepLabV3+ </span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Starting DeepLabV3+ Fine-Tuning Loop..."</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>seg_history <span class="op">=</span> custom_segmenter.fit(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>train_images,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>train_masks,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Fine-Tuning Complete! Final Loss: </span><span class="sc">{</span>seg_history<span class="sc">.</span>history[<span class="st">'loss'</span>][<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre>Starting DeepLabV3+ Fine-Tuning Loop...
+
+<span class="ansi-bold">2/2</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">27s</span> 8s/step - loss: 0.6051 - pixel_accuracy: 0.7072
+
+Fine-Tuning Complete! Final Loss: 0.6051
+</pre>
+</div>
+</div>
+</div>
+<div id="9a3ad5d9" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the inference</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>pred_logits <span class="op">=</span> custom_segmenter.predict(train_images[:<span class="dv">1</span>])</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert 3D class logits (H, W, num_classes) to 2D categorical class map (H, W)</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>pred_mask <span class="op">=</span> np.argmax(pred_logits[<span class="dv">0</span>], axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>plot_segmentation_comparison(</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span>train_images[<span class="dv">0</span>],</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    ground_truth<span class="op">=</span>train_masks[<span class="dv">0</span>],</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    prediction<span class="op">=</span>pred_mask,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Fine-Tuned DeepLabV3+ Segmentation Result"</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-bold">1/1</span> <span class="ansi-green-fg">━━━━━━━━━━━━━━━━━━━━</span> <span class="ansi-bold">2s</span> 2s/step
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-19-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 </section>
 <section id="multimodal-ai" class="level2">
 <h2 class="anchored" data-anchor-id="multimodal-ai">Multimodal AI</h2>
-<div id="06e02a81" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kagglehub.login()</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Try paligemma or gemm4</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>gemma <span class="op">=</span> keras_hub.models.PaliGemmaCausalLM.from_preset(<span class="st">"pali_gemma_3b_224"</span>)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"detect tumor</span><span class="ch">\n</span><span class="st">"</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Read more model syntax: https://ai.google.dev/gemma/docs/paligemma/inference-with-keras</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># gemma = keras_hub.models.Gemma4CausalLM.from_preset("gemma4_instruct_2b")</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># PROMPT = "Give me the bounding box coordinates for any tumors in this mri scan of a brain\n"</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>output_text <span class="op">=</span> gemma.generate({</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"images"</span>: image_np,</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompts"</span>: PROMPT,</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Gemma Output: </span><span class="sc">{</span><span class="bu">repr</span>(output_text)<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="06e02a81" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kagglehub.login()</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Try paligemma or gemm4</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>gemma <span class="op">=</span> keras_hub.models.PaliGemmaCausalLM.from_preset(<span class="st">"pali_gemma_3b_224"</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"detect tumor</span><span class="ch">\n</span><span class="st">"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Read more model syntax: https://ai.google.dev/gemma/docs/paligemma/inference-with-keras</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="co"># gemma = keras_hub.models.Gemma4CausalLM.from_preset("gemma4_instruct_2b")</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="co"># PROMPT = "Give me the bounding box coordinates for any tumors in this mri scan of a brain\n"</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>output_text <span class="op">=</span> gemma.generate({</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"images"</span>: train_images[<span class="dv">0</span>],</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prompts"</span>: PROMPT,</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Gemma Output: </span><span class="sc">{</span><span class="bu">repr</span>(output_text)<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Gemma Output: 'detect tumor\n&lt;loc0148&gt;&lt;loc0070&gt;&lt;loc0867&gt;&lt;loc1023&gt; tumor'
+</code></pre>
 </div>
-<div id="94cc8e75" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation Helper Function</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_gemma_boxes(output_text, img_width, img_height):</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Parses bounding box coordinates from PaliGemma/Gemma model text outputs.</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Supports location tokens (&lt;locYMIN&gt;&lt;locXMIN&gt;&lt;locYMAX&gt;&lt;locXMAX&gt;),</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">    JSON formats (e.g. {"box_2d": [ymin, xmin, ymax, xmax], "label": "..."}),</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">    and generic coordinate arrays.</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(output_text, <span class="bu">str</span>):</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        output_text <span class="op">=</span> <span class="bu">str</span>(output_text)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    boxes <span class="op">=</span> []</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> []</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Location token format (&lt;locYMIN&gt;&lt;locXMIN&gt;&lt;locYMAX&gt;&lt;locXMAX&gt;)</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    loc_pattern <span class="op">=</span> <span class="vs">r"&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="vs">"</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    loc_matches <span class="op">=</span> re.findall(loc_pattern, output_text)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> loc_matches:</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"match 1"</span>)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ymin_s, xmin_s, ymax_s, xmax_s, label <span class="kw">in</span> loc_matches:</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            ymin_val, xmin_val <span class="op">=</span> <span class="bu">float</span>(ymin_s), <span class="bu">float</span>(xmin_s)</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>            ymax_val, xmax_val <span class="op">=</span> <span class="bu">float</span>(ymax_s), <span class="bu">float</span>(xmax_s)</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>            w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>            h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>            boxes.append([x1, y1, w, h])</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>            labels.append(label.strip() <span class="cf">if</span> label.strip() <span class="cf">else</span> <span class="st">"tumor"</span>)</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> boxes, labels</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. JSON / box_2d format</span></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    box2d_pattern <span class="op">=</span> <span class="vs">r'"box_2d"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">:</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\[</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\]</span><span class="vs">'</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>    box2d_matches <span class="op">=</span> <span class="bu">list</span>(re.finditer(box2d_pattern, output_text))</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> box2d_matches:</span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"match 2"</span>)</span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> box2d_matches:</span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>            ymin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">1</span>))</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>            xmin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">2</span>))</span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>            ymax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">3</span>))</span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>            xmax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">4</span>))</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>            label <span class="op">=</span> <span class="st">"tumor"</span></span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>            start_idx <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, match.start() <span class="op">-</span> <span class="dv">100</span>)</span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>            end_idx <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(output_text), match.end() <span class="op">+</span> <span class="dv">100</span>)</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>            context_str <span class="op">=</span> output_text[start_idx:end_idx]</span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>            label_match <span class="op">=</span> re.search(<span class="vs">r'"</span>(?:<span class="vs">label</span><span class="cf">|</span><span class="vs">name</span><span class="cf">|</span><span class="vs">class</span>)<span class="vs">"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">:</span><span class="dv">\s</span><span class="op">*</span><span class="vs">"</span><span class="kw">(</span><span class="pp">[^"]</span><span class="op">+</span><span class="kw">)</span><span class="vs">"'</span>, context_str)</span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> label_match:</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>                label <span class="op">=</span> label_match.group(<span class="dv">1</span>)</span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>            max_coord <span class="op">=</span> <span class="bu">max</span>(<span class="bu">abs</span>(ymin_val), <span class="bu">abs</span>(xmin_val), <span class="bu">abs</span>(ymax_val), <span class="bu">abs</span>(xmax_val))</span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> max_coord <span class="op">&lt;=</span> <span class="fl">1.0</span>:</span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">*</span> img_height)</span>
-<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">*</span> img_width)</span>
-<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">*</span> img_height)</span>
-<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">*</span> img_width)</span>
-<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> max_coord <span class="op">&lt;=</span> <span class="fl">1000.0</span>:</span>
-<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
-<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val)</span>
-<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val)</span>
-<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val)</span>
-<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val)</span>
-<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>            w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
-<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>            h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
-<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>            boxes.append([x1, y1, w, h])</span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>            labels.append(label)</span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> boxes, labels</span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Fallback to generic 4-number list match</span></span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>    list_pattern <span class="op">=</span> <span class="vs">r'</span><span class="ch">\[</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\]</span><span class="vs">'</span></span>
-<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    list_matches <span class="op">=</span> <span class="bu">list</span>(re.finditer(list_pattern, output_text))</span>
-<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"match 3"</span>)</span>
-<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> match <span class="kw">in</span> list_matches:</span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>        ymin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">1</span>))</span>
-<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>        xmin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">2</span>))</span>
-<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>        ymax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">3</span>))</span>
-<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>        xmax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">4</span>))</span>
-<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>        max_coord <span class="op">=</span> <span class="bu">max</span>(<span class="bu">abs</span>(ymin_val), <span class="bu">abs</span>(xmin_val), <span class="bu">abs</span>(ymax_val), <span class="bu">abs</span>(xmax_val))</span>
-<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> max_coord <span class="op">&lt;=</span> <span class="fl">1.0</span>:</span>
-<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">*</span> img_height)</span>
-<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">*</span> img_width)</span>
-<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">*</span> img_height)</span>
-<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">*</span> img_width)</span>
-<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> max_coord <span class="op">&lt;=</span> <span class="fl">1000.0</span>:</span>
-<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
-<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
-<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val)</span>
-<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val)</span>
-<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val)</span>
-<span id="cb20-100"><a href="#cb20-100" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val)</span>
-<span id="cb20-101"><a href="#cb20-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-102"><a href="#cb20-102" aria-hidden="true" tabindex="-1"></a>        w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
-<span id="cb20-103"><a href="#cb20-103" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
-<span id="cb20-104"><a href="#cb20-104" aria-hidden="true" tabindex="-1"></a>        boxes.append([x1, y1, w, h])</span>
-<span id="cb20-105"><a href="#cb20-105" aria-hidden="true" tabindex="-1"></a>        labels.append(<span class="st">"tumor"</span>)</span>
-<span id="cb20-106"><a href="#cb20-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-107"><a href="#cb20-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> boxes, labels</span>
-<span id="cb20-108"><a href="#cb20-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-109"><a href="#cb20-109" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_predictions(image, boxes, labels, title<span class="op">=</span><span class="st">"Gemma Prediction"</span>, output_path<span class="op">=</span><span class="st">"04_cv4_gemma_prediction.png"</span>):</span>
-<span id="cb20-110"><a href="#cb20-110" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb20-111"><a href="#cb20-111" aria-hidden="true" tabindex="-1"></a><span class="co">    Renders an image with overlaid bounding boxes parsed from Gemma output.</span></span>
-<span id="cb20-112"><a href="#cb20-112" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb20-113"><a href="#cb20-113" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
-<span id="cb20-114"><a href="#cb20-114" aria-hidden="true" tabindex="-1"></a>    ax.imshow(image)</span>
-<span id="cb20-115"><a href="#cb20-115" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-116"><a href="#cb20-116" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> [<span class="st">"#EA4335"</span>, <span class="st">"#4285F4"</span>, <span class="st">"#FBBC04"</span>, <span class="st">"#34A853"</span>]</span>
-<span id="cb20-117"><a href="#cb20-117" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> boxes:</span>
-<span id="cb20-118"><a href="#cb20-118" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, (box, label) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(boxes, labels)):</span>
-<span id="cb20-119"><a href="#cb20-119" aria-hidden="true" tabindex="-1"></a>            xmin, ymin, w, h <span class="op">=</span> box</span>
-<span id="cb20-120"><a href="#cb20-120" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> colors[idx <span class="op">%</span> <span class="bu">len</span>(colors)]</span>
-<span id="cb20-121"><a href="#cb20-121" aria-hidden="true" tabindex="-1"></a>            rect <span class="op">=</span> patches.Rectangle((xmin, ymin), w, h, linewidth<span class="op">=</span><span class="fl">2.5</span>, edgecolor<span class="op">=</span>color, facecolor<span class="op">=</span><span class="st">"none"</span>)</span>
-<span id="cb20-122"><a href="#cb20-122" aria-hidden="true" tabindex="-1"></a>            ax.add_patch(rect)</span>
-<span id="cb20-123"><a href="#cb20-123" aria-hidden="true" tabindex="-1"></a>            ax.text(</span>
-<span id="cb20-124"><a href="#cb20-124" aria-hidden="true" tabindex="-1"></a>                xmin, <span class="bu">max</span>(<span class="fl">15.0</span>, ymin <span class="op">-</span> <span class="fl">5.0</span>), label,</span>
-<span id="cb20-125"><a href="#cb20-125" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"white"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, weight<span class="op">=</span><span class="st">"bold"</span>,</span>
-<span id="cb20-126"><a href="#cb20-126" aria-hidden="true" tabindex="-1"></a>                bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"square,pad=0.2"</span>, facecolor<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.85</span>)</span>
-<span id="cb20-127"><a href="#cb20-127" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb20-128"><a href="#cb20-128" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb20-129"><a href="#cb20-129" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">13</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb20-130"><a href="#cb20-130" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
-<span id="cb20-131"><a href="#cb20-131" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb20-132"><a href="#cb20-132" aria-hidden="true" tabindex="-1"></a>    plt.savefig(output_path, bbox_inches<span class="op">=</span><span class="st">"tight"</span>, dpi<span class="op">=</span><span class="dv">150</span>)</span>
-<span id="cb20-133"><a href="#cb20-133" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"[Step 4] Diagnostic plot saved -&gt; </span><span class="sc">{</span>output_path<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb20-134"><a href="#cb20-134" aria-hidden="true" tabindex="-1"></a>    plt.close(fig)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="22b1ecef" class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>boxes, labels <span class="op">=</span> parse_gemma_boxes(output_text, image_np.shape[<span class="dv">1</span>], image_np.shape[<span class="dv">0</span>])</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Parsed </span><span class="sc">{</span><span class="bu">len</span>(boxes)<span class="sc">}</span><span class="ss"> bounding box(es)."</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>plot_predictions(image_np, boxes, labels, title<span class="op">=</span><span class="ss">f"Gemma Detections: '</span><span class="sc">{</span>PROMPT<span class="sc">.</span>strip()<span class="sc">}</span><span class="ss">'"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="94cc8e75" class="cell" data-execution_count="33">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualisation Helper Function</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_gemma_boxes(output_text, img_width, img_height):</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Parses bounding box coordinates from PaliGemma/Gemma model text outputs.</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Supports location tokens (&lt;locYMIN&gt;&lt;locXMIN&gt;&lt;locYMAX&gt;&lt;locXMAX&gt;),</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="co">    JSON formats (e.g. {"box_2d": [ymin, xmin, ymax, xmax], "label": "..."}),</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co">    and generic coordinate arrays.</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(output_text, <span class="bu">str</span>):</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        output_text <span class="op">=</span> <span class="bu">str</span>(output_text)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    boxes <span class="op">=</span> []</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> []</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Location token format (&lt;locYMIN&gt;&lt;locXMIN&gt;&lt;locYMAX&gt;&lt;locXMAX&gt;)</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>    loc_pattern <span class="op">=</span> <span class="vs">r"&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;&lt;loc</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">&gt;</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="vs">"</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>    loc_matches <span class="op">=</span> re.findall(loc_pattern, output_text)</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> loc_matches:</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"match 1"</span>)</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ymin_s, xmin_s, ymax_s, xmax_s, label <span class="kw">in</span> loc_matches:</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>            ymin_val, xmin_val <span class="op">=</span> <span class="bu">float</span>(ymin_s), <span class="bu">float</span>(xmin_s)</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>            ymax_val, xmax_val <span class="op">=</span> <span class="bu">float</span>(ymax_s), <span class="bu">float</span>(xmax_s)</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>            w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>            h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>            boxes.append([x1, y1, w, h])</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>            labels.append(label.strip() <span class="cf">if</span> label.strip() <span class="cf">else</span> <span class="st">"tumor"</span>)</span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> boxes, labels</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. JSON / box_2d format</span></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>    box2d_pattern <span class="op">=</span> <span class="vs">r'"box_2d"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">:</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\[</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\]</span><span class="vs">'</span></span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>    box2d_matches <span class="op">=</span> <span class="bu">list</span>(re.finditer(box2d_pattern, output_text))</span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> box2d_matches:</span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"match 2"</span>)</span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> match <span class="kw">in</span> box2d_matches:</span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a>            ymin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">1</span>))</span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>            xmin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">2</span>))</span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>            ymax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">3</span>))</span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>            xmax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">4</span>))</span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>            label <span class="op">=</span> <span class="st">"tumor"</span></span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a>            start_idx <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, match.start() <span class="op">-</span> <span class="dv">100</span>)</span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>            end_idx <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(output_text), match.end() <span class="op">+</span> <span class="dv">100</span>)</span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>            context_str <span class="op">=</span> output_text[start_idx:end_idx]</span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>            label_match <span class="op">=</span> re.search(<span class="vs">r'"</span>(?:<span class="vs">label</span><span class="cf">|</span><span class="vs">name</span><span class="cf">|</span><span class="vs">class</span>)<span class="vs">"</span><span class="dv">\s</span><span class="op">*</span><span class="vs">:</span><span class="dv">\s</span><span class="op">*</span><span class="vs">"</span><span class="kw">(</span><span class="pp">[^"]</span><span class="op">+</span><span class="kw">)</span><span class="vs">"'</span>, context_str)</span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> label_match:</span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>                label <span class="op">=</span> label_match.group(<span class="dv">1</span>)</span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a>            max_coord <span class="op">=</span> <span class="bu">max</span>(<span class="bu">abs</span>(ymin_val), <span class="bu">abs</span>(xmin_val), <span class="bu">abs</span>(ymax_val), <span class="bu">abs</span>(xmax_val))</span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> max_coord <span class="op">&lt;=</span> <span class="fl">1.0</span>:</span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">*</span> img_height)</span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">*</span> img_width)</span>
+<span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">*</span> img_height)</span>
+<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">*</span> img_width)</span>
+<span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> max_coord <span class="op">&lt;=</span> <span class="fl">1000.0</span>:</span>
+<span id="cb32-61"><a href="#cb32-61" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-62"><a href="#cb32-62" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-65"><a href="#cb32-65" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb32-66"><a href="#cb32-66" aria-hidden="true" tabindex="-1"></a>                y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val)</span>
+<span id="cb32-67"><a href="#cb32-67" aria-hidden="true" tabindex="-1"></a>                x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val)</span>
+<span id="cb32-68"><a href="#cb32-68" aria-hidden="true" tabindex="-1"></a>                y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val)</span>
+<span id="cb32-69"><a href="#cb32-69" aria-hidden="true" tabindex="-1"></a>                x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val)</span>
+<span id="cb32-70"><a href="#cb32-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-71"><a href="#cb32-71" aria-hidden="true" tabindex="-1"></a>            w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
+<span id="cb32-72"><a href="#cb32-72" aria-hidden="true" tabindex="-1"></a>            h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
+<span id="cb32-73"><a href="#cb32-73" aria-hidden="true" tabindex="-1"></a>            boxes.append([x1, y1, w, h])</span>
+<span id="cb32-74"><a href="#cb32-74" aria-hidden="true" tabindex="-1"></a>            labels.append(label)</span>
+<span id="cb32-75"><a href="#cb32-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> boxes, labels</span>
+<span id="cb32-76"><a href="#cb32-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-77"><a href="#cb32-77" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Fallback to generic 4-number list match</span></span>
+<span id="cb32-78"><a href="#cb32-78" aria-hidden="true" tabindex="-1"></a>    list_pattern <span class="op">=</span> <span class="vs">r'</span><span class="ch">\[</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">,</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[</span><span class="dv">\d</span><span class="ch">\.</span><span class="pp">]</span><span class="op">+</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="ch">\]</span><span class="vs">'</span></span>
+<span id="cb32-79"><a href="#cb32-79" aria-hidden="true" tabindex="-1"></a>    list_matches <span class="op">=</span> <span class="bu">list</span>(re.finditer(list_pattern, output_text))</span>
+<span id="cb32-80"><a href="#cb32-80" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"match 3"</span>)</span>
+<span id="cb32-81"><a href="#cb32-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> match <span class="kw">in</span> list_matches:</span>
+<span id="cb32-82"><a href="#cb32-82" aria-hidden="true" tabindex="-1"></a>        ymin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">1</span>))</span>
+<span id="cb32-83"><a href="#cb32-83" aria-hidden="true" tabindex="-1"></a>        xmin_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">2</span>))</span>
+<span id="cb32-84"><a href="#cb32-84" aria-hidden="true" tabindex="-1"></a>        ymax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">3</span>))</span>
+<span id="cb32-85"><a href="#cb32-85" aria-hidden="true" tabindex="-1"></a>        xmax_val <span class="op">=</span> <span class="bu">float</span>(match.group(<span class="dv">4</span>))</span>
+<span id="cb32-86"><a href="#cb32-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-87"><a href="#cb32-87" aria-hidden="true" tabindex="-1"></a>        max_coord <span class="op">=</span> <span class="bu">max</span>(<span class="bu">abs</span>(ymin_val), <span class="bu">abs</span>(xmin_val), <span class="bu">abs</span>(ymax_val), <span class="bu">abs</span>(xmax_val))</span>
+<span id="cb32-88"><a href="#cb32-88" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> max_coord <span class="op">&lt;=</span> <span class="fl">1.0</span>:</span>
+<span id="cb32-89"><a href="#cb32-89" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">*</span> img_height)</span>
+<span id="cb32-90"><a href="#cb32-90" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">*</span> img_width)</span>
+<span id="cb32-91"><a href="#cb32-91" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">*</span> img_height)</span>
+<span id="cb32-92"><a href="#cb32-92" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">*</span> img_width)</span>
+<span id="cb32-93"><a href="#cb32-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> max_coord <span class="op">&lt;=</span> <span class="fl">1000.0</span>:</span>
+<span id="cb32-94"><a href="#cb32-94" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-95"><a href="#cb32-95" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-96"><a href="#cb32-96" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_height)</span>
+<span id="cb32-97"><a href="#cb32-97" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val <span class="op">/</span> <span class="fl">1000.0</span> <span class="op">*</span> img_width)</span>
+<span id="cb32-98"><a href="#cb32-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb32-99"><a href="#cb32-99" aria-hidden="true" tabindex="-1"></a>            y1 <span class="op">=</span> <span class="bu">int</span>(ymin_val)</span>
+<span id="cb32-100"><a href="#cb32-100" aria-hidden="true" tabindex="-1"></a>            x1 <span class="op">=</span> <span class="bu">int</span>(xmin_val)</span>
+<span id="cb32-101"><a href="#cb32-101" aria-hidden="true" tabindex="-1"></a>            y2 <span class="op">=</span> <span class="bu">int</span>(ymax_val)</span>
+<span id="cb32-102"><a href="#cb32-102" aria-hidden="true" tabindex="-1"></a>            x2 <span class="op">=</span> <span class="bu">int</span>(xmax_val)</span>
+<span id="cb32-103"><a href="#cb32-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-104"><a href="#cb32-104" aria-hidden="true" tabindex="-1"></a>        w <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, x2 <span class="op">-</span> x1)</span>
+<span id="cb32-105"><a href="#cb32-105" aria-hidden="true" tabindex="-1"></a>        h <span class="op">=</span> <span class="bu">max</span>(<span class="dv">1</span>, y2 <span class="op">-</span> y1)</span>
+<span id="cb32-106"><a href="#cb32-106" aria-hidden="true" tabindex="-1"></a>        boxes.append([x1, y1, w, h])</span>
+<span id="cb32-107"><a href="#cb32-107" aria-hidden="true" tabindex="-1"></a>        labels.append(<span class="st">"tumor"</span>)</span>
+<span id="cb32-108"><a href="#cb32-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-109"><a href="#cb32-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> boxes, labels</span>
+<span id="cb32-110"><a href="#cb32-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-111"><a href="#cb32-111" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_predictions(image, boxes, labels, title<span class="op">=</span><span class="st">"Gemma Prediction"</span>, output_path<span class="op">=</span><span class="st">"04_cv4_gemma_prediction.png"</span>):</span>
+<span id="cb32-112"><a href="#cb32-112" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb32-113"><a href="#cb32-113" aria-hidden="true" tabindex="-1"></a><span class="co">    Renders an image with overlaid bounding boxes parsed from Gemma output.</span></span>
+<span id="cb32-114"><a href="#cb32-114" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb32-115"><a href="#cb32-115" aria-hidden="true" tabindex="-1"></a>    fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">7</span>))</span>
+<span id="cb32-116"><a href="#cb32-116" aria-hidden="true" tabindex="-1"></a>    ax.imshow(image)</span>
+<span id="cb32-117"><a href="#cb32-117" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb32-118"><a href="#cb32-118" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> [<span class="st">"#EA4335"</span>, <span class="st">"#4285F4"</span>, <span class="st">"#FBBC04"</span>, <span class="st">"#34A853"</span>]</span>
+<span id="cb32-119"><a href="#cb32-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> boxes:</span>
+<span id="cb32-120"><a href="#cb32-120" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, (box, label) <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">zip</span>(boxes, labels)):</span>
+<span id="cb32-121"><a href="#cb32-121" aria-hidden="true" tabindex="-1"></a>            xmin, ymin, w, h <span class="op">=</span> box</span>
+<span id="cb32-122"><a href="#cb32-122" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> colors[idx <span class="op">%</span> <span class="bu">len</span>(colors)]</span>
+<span id="cb32-123"><a href="#cb32-123" aria-hidden="true" tabindex="-1"></a>            rect <span class="op">=</span> patches.Rectangle((xmin, ymin), w, h, linewidth<span class="op">=</span><span class="fl">2.5</span>, edgecolor<span class="op">=</span>color, facecolor<span class="op">=</span><span class="st">"none"</span>)</span>
+<span id="cb32-124"><a href="#cb32-124" aria-hidden="true" tabindex="-1"></a>            ax.add_patch(rect)</span>
+<span id="cb32-125"><a href="#cb32-125" aria-hidden="true" tabindex="-1"></a>            ax.text(</span>
+<span id="cb32-126"><a href="#cb32-126" aria-hidden="true" tabindex="-1"></a>                xmin, <span class="bu">max</span>(<span class="fl">15.0</span>, ymin <span class="op">-</span> <span class="fl">5.0</span>), label,</span>
+<span id="cb32-127"><a href="#cb32-127" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span><span class="st">"white"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, weight<span class="op">=</span><span class="st">"bold"</span>,</span>
+<span id="cb32-128"><a href="#cb32-128" aria-hidden="true" tabindex="-1"></a>                bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"square,pad=0.2"</span>, facecolor<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.85</span>)</span>
+<span id="cb32-129"><a href="#cb32-129" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb32-130"><a href="#cb32-130" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb32-131"><a href="#cb32-131" aria-hidden="true" tabindex="-1"></a>    ax.set_title(title, fontsize<span class="op">=</span><span class="dv">13</span>, weight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb32-132"><a href="#cb32-132" aria-hidden="true" tabindex="-1"></a>    ax.axis(<span class="st">"off"</span>)</span>
+<span id="cb32-133"><a href="#cb32-133" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb32-134"><a href="#cb32-134" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="22b1ecef" class="cell" data-execution_count="34">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>boxes, labels <span class="op">=</span> parse_gemma_boxes(output_text, train_images[<span class="dv">0</span>].shape[<span class="dv">1</span>], train_images[<span class="dv">0</span>].shape[<span class="dv">0</span>])</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Parsed </span><span class="sc">{</span><span class="bu">len</span>(boxes)<span class="sc">}</span><span class="ss"> bounding box(es)."</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>plot_predictions(train_images[<span class="dv">0</span>], boxes, labels, title<span class="op">=</span><span class="ss">f"Gemma Detections: '</span><span class="sc">{</span>PROMPT<span class="sc">.</span>strip()<span class="sc">}</span><span class="ss">'"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers). Got range [0.0..255.0].</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>match 1
+Parsed 1 bounding box(es).</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04-a-cv_files/figure-html/cell-22-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 
 
