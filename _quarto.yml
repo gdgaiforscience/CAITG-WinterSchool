@@ -17,20 +17,16 @@ website:
             text: RAG
       - href: session/03-agents.ipynb
         text: Agents
-      - text: "Multimodal AI & Computer Vision"
-        menu:
-          - href: session/04-a-modern-cv.ipynb
-            text: CV Intro
-          - href: session/04-b-modern-objectdetection.ipynb
-            text: Object Detection
-          - href: session/04-c-modern-segmentation.ipynb
-            text: Semantic Segmentation
+      - href: session/04-a-cv.ipynb
+        text: "Multimodal AI & Computer Vision"
       - text: "Bonus"
         menu:
           - href: session/99-a-antigravity.qmd
             text: Antigravity
           - href: session/99-b-ML.ipynb
             text: Machine Learning
+          - href: session/99-cv-objectdetection_mediapipe.ipynb
+            text: "MediaPipe object detection"
   google-analytics:
     tracking-id: "G-344M4P3CHH"
     storage: cookies
