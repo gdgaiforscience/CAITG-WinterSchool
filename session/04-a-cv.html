@@ -406,7 +406,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul class="collapse">
-  <li><a href="#foundation-models-the-hybrid-paradigm" id="toc-foundation-models-the-hybrid-paradigm" class="nav-link active" data-scroll-target="#foundation-models-the-hybrid-paradigm">Foundation Models &amp; The Hybrid Paradigm</a></li>
+  <li><a href="#workshop-goals" id="toc-workshop-goals" class="nav-link active" data-scroll-target="#workshop-goals">Workshop Goals</a></li>
   <li><a href="#object-detection-with-keras-and-retinanet" id="toc-object-detection-with-keras-and-retinanet" class="nav-link" data-scroll-target="#object-detection-with-keras-and-retinanet">Object Detection with Keras and RetinaNet</a></li>
   <li><a href="#semantic-segmentation-with-deeplabv3" id="toc-semantic-segmentation-with-deeplabv3" class="nav-link" data-scroll-target="#semantic-segmentation-with-deeplabv3">Semantic Segmentation with DeepLabV3+</a></li>
   <li><a href="#multimodal-ai" id="toc-multimodal-ai" class="nav-link" data-scroll-target="#multimodal-ai">Multimodal AI</a></li>
@@ -551,17 +551,17 @@ window.Quarto = {
 <li><strong>Global Receptive Field:</strong> Unlike CNNs, which build global context slowly across many layers, a Transformer can connect distant regions of an image (e.g., comparing the top-left forest canopy with the bottom-right soil condition) right from the first layer.</li>
 </ol>
 </section>
-<section id="foundation-models-the-hybrid-paradigm" class="level2">
-<h2 class="anchored" data-anchor-id="foundation-models-the-hybrid-paradigm">Foundation Models &amp; The Hybrid Paradigm</h2>
-<section id="vision-language-models-e.g.-gemini-as-the-brain" class="level3">
-<h3 class="anchored" data-anchor-id="vision-language-models-e.g.-gemini-as-the-brain">Vision-Language Models (e.g., Gemini) as “The Brain”</h3>
+<section id="foundation-models-the-hybrid-paradigm" class="level3">
+<h3 class="anchored" data-anchor-id="foundation-models-the-hybrid-paradigm">Foundation Models &amp; The Hybrid Paradigm</h3>
+<section id="vision-language-models-e.g.-gemini" class="level4">
+<h4 class="anchored" data-anchor-id="vision-language-models-e.g.-gemini">Vision-Language Models (e.g., Gemini)</h4>
 <ul>
 <li><strong>Zero-Shot Reasoning:</strong> You can prompt a VLM to evaluate complex conditions without training custom weights (e.g., <em>“Identify trees showing symptoms of drought stress near agricultural run-off points”</em>).</li>
 <li><strong>Contextual World Knowledge:</strong> VLMs combine raw spatial perception with domain-specific scientific knowledge, parsing intent, visual metaphors, and multi-step instructions.</li>
 </ul>
 </section>
-<section id="specialised-models-e.g.-sam-yolo-mask-r-cnn-as-the-hands" class="level3">
-<h3 class="anchored" data-anchor-id="specialised-models-e.g.-sam-yolo-mask-r-cnn-as-the-hands">Specialised Models (e.g., SAM, YOLO, Mask R-CNN) as “The Hands”</h3>
+<section id="specialised-models-e.g.-sam-yolo-mask-r-cnn" class="level4">
+<h4 class="anchored" data-anchor-id="specialised-models-e.g.-sam-yolo-mask-r-cnn">Specialised Models (e.g., SAM, YOLO, Mask R-CNN)</h4>
 <p>Despite the reasoning capabilities of broad VLMs, dedicated vision models remain essential for three reasons:</p>
 <ul>
 <li><strong>Sub-Pixel Boundary Precision:</strong> Dedicated models like the Segment Anything Model (SAM) produce crisp, mathematically exact boundaries required for scientific measurement (e.g., cell boundaries, leaf area index).</li>
@@ -570,9 +570,16 @@ window.Quarto = {
 </ul>
 </section>
 </section>
-<section id="object-detection-with-keras-and-retinanet" class="level2">
-<h2 class="anchored" data-anchor-id="object-detection-with-keras-and-retinanet">Object Detection with Keras and RetinaNet</h2>
-<p>Key Learning Objectives:</p>
+<section id="backbones-and-heads" class="level3">
+<h3 class="anchored" data-anchor-id="backbones-and-heads">Backbones and Heads</h3>
+<p>In computer vision models, architecture is typically split into two main parts:</p>
+<ol type="1">
+<li>The Backbone (Feature Extractor) converts high-resolution raw image pixels into compact, rich feature representations (tensors). Programatically it is defined by a Convolutional Neural Network (CNN) like ResNet-50, VGG-16, or EfficientNet (which are a bunch of tensor transfomations). Early layers capture basic features (edges, textures, colors), while deeper layers capture complex semantics (faces, wheels, object parts). Backbones are often pre-trained on huge datasets (like ImageNet) and swapped modularly between different tasks.</li>
+<li>The Head / Neck (Task-Specific Module) takes the feature tensors produced by the backbone and uses them to perform the specific downstream task like Image Classification, Object Detection, Segmentation, etc.</li>
+</ol>
+</section>
+<section id="workshop-goals" class="level2">
+<h2 class="anchored" data-anchor-id="workshop-goals">Workshop Goals</h2>
 <ol type="1">
 <li>Understand why general-purpose pre-trained models (e.g., COCO) need domain and data adaptation.</li>
 <li>Load and parse annotations and downloaded.</li>
@@ -580,6 +587,13 @@ window.Quarto = {
 <li>Adapt a DeepLabV3+ semantic segmentation model to a custom taxonomy.</li>
 <li>Fine-tune both models with Keras and KerasHub using transfer learning.</li>
 </ol>
+</section>
+<section id="object-detection-with-keras-and-retinanet" class="level2">
+<h2 class="anchored" data-anchor-id="object-detection-with-keras-and-retinanet">Object Detection with Keras and RetinaNet</h2>
+<p>For our first task we will explore Object Detection using the <a href="https://www.kaggle.com/models/keras/retinanet/keras/retinanet_resnet50_fpn_v2_coco/3">RetinaNet</a> model using <a href="https://keras.io/keras_hub/api/models/retinanet/">Keras</a> framework pre-trained on the <a href="https://cocodataset.org/">COCO</a> dataset. The pre-training let’s the model backbone understand feature you might expect to find in any image, curves, shapes, colors, shading, lines - so it knows “this particular set of features means it is a picture of a dog”.</p>
+<section id="retinanet" class="level3">
+<h3 class="anchored" data-anchor-id="retinanet">RetinaNet</h3>
+<p>RetinaNet is a standard one-stage object detection model that introduces the Focal Loss function to address extreme class imbalance between background and foreground objects during training. By prioritizing hard-to-classify examples over easy background patches, it achieves speed comparable to single-stage detectors (like <a href="https://docs.ultralytics.com/">YOLO</a>) while matching the accuracy of complex two-stage detectors (like <a href="https://arxiv.org/abs/1506.01497">Faster R-CNN</a>).</p>
 <div id="cell-2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure Keras to use JAX backend CPU/GPU/TPU execution</span></span>
@@ -941,8 +955,10 @@ Prediction confidence: [0.9999999  0.9999999  0.9999969  0.9999944  0.9999753  0
 </div>
 </div>
 </section>
+</section>
 <section id="semantic-segmentation-with-deeplabv3" class="level2">
 <h2 class="anchored" data-anchor-id="semantic-segmentation-with-deeplabv3">Semantic Segmentation with DeepLabV3+</h2>
+<p>For our next task we will use <a href="https://www.kaggle.com/models/keras/deeplabv3plus">DeepLabV3+</a> to perform semantic segmentation. DeepLabV3+ extends the original DeepLabV3 by introducing an explicit, lightweight Decoder module to refine segmentation results, especially along object boundaries. Two key features are Atrous (Dilated) Convolution and Atrous Spatial Pyramid Pooling (ASPP) to expand its field of view (receptive field) to capture broader context in parallel without increasing the number of parameters or losing spatial resolution through aggressive downsampling. It is pre-trained on <a href="https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/">PASCAL VOC</a>.</p>
 <div id="cd3d1286" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> ImageDraw</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
